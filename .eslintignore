@@ -1,0 +1,5 @@
+/web/build/
+/web/config/
+/web/dist/
+/*.js
+/web/test/unit/coverage/
