@@ -46,4 +46,4 @@ app.use(function (request, response, next) {
 
 app.listen(port)
 
-console.log('api: Server started at port ' + port)
+console.log('Coinaly API: Server started at port ' + port)
