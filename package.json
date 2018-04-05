@@ -19,11 +19,13 @@
     "connect-slashes": "^1.3.1",
     "cookie-parser": "^1.4.3",
     "cryptorjs": "^2.1.0",
-    "dotenv": "^4.0.0",
+    "dotenv": "^5.0.1",
     "express": "^4.16.3",
     "jest": "^22.4.3",
+    "knex": "^0.14.4",
     "nodemon": "^1.14.3",
     "ololog": "^1.1.83",
+    "pg": "^7.4.1",
     "raven": "^2.4.2"
   },
   "browserslist": [

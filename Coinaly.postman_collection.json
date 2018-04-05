@@ -1,0 +1,250 @@
+{
+	"info": {
+		"name": "Coinaly",
+		"_postman_id": "8793f781-2c9b-c139-743e-0548ec69570f",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "api/auth",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"\",\n\t\t\"apiSecret\": \"\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/auth",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"auth"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/balances",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/balances",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"balances"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/orders",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"orders"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/tickers",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/tickers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"tickers"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/withdrawalhistory",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/withdrawalhistory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"withdrawalhistory"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/deposithistory",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/deposithistory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"deposithistory"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/cancelorder",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"exchange\": \"bittrex\",\n\t\t\"apiKey\": \"keytest\",\n\t\t\"apiSecret\": \"secrettest\"\n\t}\n]"
+				},
+				"url": {
+					"raw": "http://localhost:5000/cancelorder?uuid=test",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"cancelorder"
+					],
+					"query": [
+						{
+							"key": "uuid",
+							"value": "test",
+							"equals": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "api/markets/buy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"symbol\": \"XRP/BTC\",\n\t\"amount\": 1,\n\t\"price\": 0.000000001\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/markets/buy",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"markets",
+						"buy"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
