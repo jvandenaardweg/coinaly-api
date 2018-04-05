@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
     table.integer('exchange_id').notNullable()
     table.string('api_key').notNullable()
     table.string('api_secret').notNullable()
+    table.string('salt').notNullable()
 
     // Set relationships
     table.foreign('exchange_id').references('id').inTable('exchanges').onDelete('CASCADE')
