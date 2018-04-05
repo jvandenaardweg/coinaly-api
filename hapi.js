@@ -33,37 +33,37 @@ server.route({
 
 server.route({
   method: 'GET',
-  path: '/balances',
+  path: '/exchanges/{exchange}/balances',
   handler: balancesController.index
 })
 
 server.route({
   method: 'GET',
-  path: '/orders',
+  path: '/exchanges/{exchange}/orders',
   handler: ordersController.index
 })
 
 server.route({
   method: 'GET',
-  path: '/orders/{status}',
+  path: '/exchanges/{exchange}/orders/{status}',
   handler: ordersController.indexStatus
 })
 
 server.route({
   method: 'GET',
-  path: '/deposits',
+  path: '/exchanges/{exchange}/deposits',
   handler: depositsController.index
 })
 
 server.route({
   method: 'GET',
-  path: '/withdrawals',
+  path: '/exchanges/{exchange}/withdrawals',
   handler: withdrawalsController.index
 })
 
 server.route({
   method: 'GET',
-  path: '/markets',
+  path: '/exchanges/{exchange}/markets',
   handler: marketsController.index
 })
 
