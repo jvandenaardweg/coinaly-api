@@ -12,9 +12,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "dev:hapi": "nodemon hapi.js"
+    "docs": "apidoc -i ./controllers -o ./docs/"
   },
   "dependencies": {
+    "apidoc": "^0.17.6",
     "boom": "^7.2.0",
     "catbox-redis": "^4.1.0",
     "ccxt": "^1.12.94",

@@ -1,49 +1,161 @@
-require('dotenv').config()
-const express = require('express')
-const app = express()
+'use strict'
+// Error reporting monitoring
+const newrelic = require('newrelic')
 const Raven = require('raven')
-const bodyParser = require('body-parser')
-const slashes = require('connect-slashes')
-const compression = require('compression')
-const cookieParser = require('cookie-parser')
-const apiRoutesExchanges = require('./routes/exchanges')
+Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f73f18971@sentry.io/1098123').install();
 
+// Base
 const port = process.env.PORT || 5000
+const Hapi = require('hapi')
+const HapiNewRelic = require('hapi-newrelic')
 
-// Must configure Raven before doing anything else with it
-Raven.config('https://6017930c14144ebba549f005a84ea4d6:e33b2600cd274d3991e16559d71806d7@sentry.io/1085664').install();
+// Route controllers
+const balancesController = require('./controllers/balances')
+const ordersController = require('./controllers/orders')
+const usersController = require('./controllers/users')
+const depositsController = require('./controllers/deposits')
+const withdrawalsController = require('./controllers/withdrawals')
+const marketsController = require('./controllers/markets')
+const tickersController = require('./controllers/tickers')
 
-app.use(Raven.requestHandler()) // The request handler must be the first middleware on the app
-app.use(Raven.errorHandler())
-app.use(cookieParser())
-app.use(compression())
-app.use(bodyParser.json())
-app.use(slashes(false))
+// Create the server
+const server = Hapi.server({
+  port: port,
+  host: 'localhost',
+  cache: [
+    {
+        name: 'redisCache',
+        engine: require('catbox-redis'),
+        url: process.env.REDIS_URL,
+        partition: 'cache'
+    }
+  ]
+})
 
-if (!process.env.ENCODE_SECRET) {
-  console.log('Please add a ENCODE_SECRET to the .env file. This is used to encrypt and decrypt the API keys and secrets.')
-  return false
+// Routes
+server.route({
+  method: 'GET',
+  path: '/',
+  handler: (request, h) => {
+    return {
+      message: 'Hello! info@coinaly.io'
+    }
+  }
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/balances',
+  handler: balancesController.index,
+  config: {
+    plugins: {
+      'hapi-newrelic': {
+        transactionName: 'balances'
+      }
+    }
+  }
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/orders',
+  handler: ordersController.index,
+  config: {
+    plugins: {
+      'hapi-newrelic': {
+        transactionName: 'orders'
+      }
+    }
+  }
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/orders/{status}',
+  handler: ordersController.indexStatus
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/deposits',
+  handler: depositsController.index
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/withdrawals',
+  handler: withdrawalsController.index
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/markets',
+  handler: marketsController.index
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/markets/fetch',
+  handler: marketsController.fetch
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/markets/load',
+  handler: marketsController.load
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/tickers/{symbol?}',
+  handler: tickersController.show
+})
+
+server.route({
+  method: 'POST',
+  path: '/users',
+  handler: usersController.create
+})
+
+// Set correct New Relic transaction naming
+server.ext('onRequest', function (request, h) {
+  let transactionName = request.path
+
+  // Remove first slash, so we get proper naming for new relic
+  while(transactionName.charAt(0) === '/') {
+    transactionName = transactionName.substr(1)
+  }
+
+  newrelic.setTransactionName(transactionName)
+  return h.continue
+})
+
+const options = {
+  ops: {
+    interval: 5000
+  },
+  reporters: {
+    console: [{
+      module: 'good-console'
+    }, 'stdout']
+  }
 }
 
-// Disable CORS
-app.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'production') {
-    res.header('Access-Control-Allow-Origin', 'https://app.coinaly.io')
-  } else {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
-  }
-  res.header('Access-Control-Allow-Credentials', 'true')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
+const init = async () => {
+  await server.register({
+    plugin: require('good'),
+    options
+  })
+  await server.start()
+  console.log(`Coinaly API: Server running at: ${server.info.uri}`)
+
+
+}
+
+process.on('unhandledRejection', (err) => {
+  console.log(err)
+  Raven.captureException(err)
+  process.exit(1)
 })
 
-app.use('/', apiRoutesExchanges)
-
-// Catch 404
-app.use(function (request, response, next) {
-  response.status(404).json({message: '404 - Not found', contact: 'If this happens more often, contact us at info@coinaly.io'})
-})
-
-app.listen(port)
-
-console.log('Coinaly API: Server started at port ' + port)
+init()

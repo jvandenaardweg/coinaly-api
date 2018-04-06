@@ -11,5 +11,10 @@
 
 ### Creating table
 1. Run: `knex migrate:make tablename`, like: `knex migrate:make users`
-2. See `/migrations` for example files
+2. See `/database/migrations` for example files
 3. After setting the schema, run: `knex migrate:latest`
+
+### Creating seed
+1. Run `knex seed:make seedname`, like: `knex seed:make users`
+2. See `/database/seeds` for example files
+3. After setting up the seed, run `knex seed:run`
