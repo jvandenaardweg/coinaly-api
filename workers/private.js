@@ -34,11 +34,25 @@ class PrivateExchangeWorker extends ExchangeWorker {
   }
 
   // Private
-  async fetchOrders () {
+  async fetchOrders (forceRefresh) {
     console.log('Exchange Worker (private):', 'Fetch Orders', `/ User ID: ${this.userId}`)
+    const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${this.userId}`
     // TODO: throttle/limit this async function
+
     try {
-      const result = await this.ccxt.fetchOrders()
+      if (forceRefresh) {
+        console.log('Exchange Worker (private):', 'Remove Balance Cache')
+        await this.deleteCache(cacheKey)
+      }
+
+      let result = await this.getCache(cacheKey)
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        result = await this.ccxt.fetchOrders()
+        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result))
+      }
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)

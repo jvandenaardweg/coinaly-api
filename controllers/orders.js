@@ -10,7 +10,7 @@ class Orders {
 
     return (async () => {
       try {
-        const result = await exchangeWorker.fetchOrders()
+        const result = await exchangeWorker.fetchOrders(forceRefresh)
         return result
       } catch (error) {
         return Boom.badImplementation(error)
