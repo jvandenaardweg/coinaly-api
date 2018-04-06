@@ -51,65 +51,6 @@ class ExchangeWorker {
 
   }
 
-  // Private
-  async fetchBalance () {
-    // TODO: throttle/limit this async function
-    try {
-      const result = await this.ccxt.fetchBalance()
-      if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-
-  // Private
-  async fetchOrders () {
-    // TODO: throttle/limit this async function
-    try {
-      const result = await this.ccxt.fetchOrders()
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-
-  // Public
-  // TODO: should always cache this one and use organisation api read key
-  async fetchMarkets () {
-    try {
-      const result = await this.ccxt.fetchMarkets()
-      if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-
-  // Public
-  // TODO: should always cache this one and use organisation api read key
-  async loadMarkets () {
-    try {
-      const result = await this.ccxt.loadMarkets()
-      if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-
-  // Public
-  // TODO: should always cache this one and use organisation api read key
-  async fetchTickers () {
-    try {
-      const result = await this.ccxt.fetchTickers()
-      if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-
   handleCCXTInstanceError (error) {
     let message
     let reason = null

@@ -4,15 +4,13 @@ class Markets {
   index (request, h) {
     const shouldForceRefresh = (request.query) ? request.query : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const apiKey = process.env.BITTREX_API_KEY // TODO: Get from db
-    const apiSecret = process.env.BITTREX_API_SECRET // TODO: Get from db
     const exchangeWorker = new PublicExchangeWorker(exchangeName)
-
 
     // 1. Check redis cache for balance
     // 2. if not in cache, do a call, and cache it
     // 3. if shouldForceRefresh is true, delete the cache, get new balance, store in cache
 
+    // redis key: public:exchanges:bittrex:markets
     return (async () => {
       try {
         const result = await exchangeWorker.fetchMarkets()

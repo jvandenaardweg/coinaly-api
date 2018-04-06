@@ -1,4 +1,3 @@
-const ExchangeWorker = require('../workers/exchange')
 const PrivateExchangeWorker = require('../workers/private')
 const Boom = require('boom')
 class Balances {
