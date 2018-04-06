@@ -2,7 +2,7 @@ const PublicExchangeWorker = require('../workers/public')
 const Boom = require('boom')
 class Tickers {
   index (request, h) {
-    const shouldForceRefresh = (request.query) ? request.query : false
+    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
     const exchangeWorker = new PublicExchangeWorker(exchangeName)
 

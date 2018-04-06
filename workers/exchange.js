@@ -1,5 +1,5 @@
 const ccxt = require('ccxt')
-
+const redis = require('../cache/redis')
 class ExchangeWorker {
   constructor (userId, exchangeSlug, apiKey, apiSecret) {
     this.exchangeSlug = exchangeSlug.toLowerCase()
@@ -39,6 +39,7 @@ class ExchangeWorker {
   createPrivateCCXTInstance () {
     // Create an CCXT instance per user
     try {
+      console.log('Exchange Worker', 'Create private instance')
       this.ccxt = new ccxt[this.exchangeSlug]({
         id: this.userId,
         apiKey: this.apiKey,
@@ -89,6 +90,34 @@ class ExchangeWorker {
 
     // TODO: if error, restart instance?
     // this.handleSentryError(`${this.exchangeName} Worker: CCXT Exchange Error: ${message}`)
+  }
+
+  async getCache (key) {
+    console.log('Exchange Worker:', 'Redis:', 'Get Cache', key)
+    const result = await redis.hget(key, 'all')
+    return result
+  }
+
+  async setCache (key, data, expire = 3600) {
+    console.log('Exchange Worker:', 'Redis:', 'Set Cache', key)
+    const result = await redis.hset(key, 'all', data)
+    redis.expire(key, expire) // Expire 3600 = 1 hour
+    return result
+  }
+
+  async deleteCache (key) {
+    const result = await redis.keys(key)
+    .then(keys => {
+      // Use pipeline instead of sending
+      // one command each time to improve the
+      // performance.
+      const pipeline = redis.pipeline()
+      keys.forEach(key => {
+        pipeline.del(key)
+      })
+      return pipeline.exec()
+    })
+    return result
   }
 }
 

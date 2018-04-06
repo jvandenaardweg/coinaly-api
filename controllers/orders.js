@@ -2,7 +2,7 @@ const PrivateExchangeWorker = require('../workers/private')
 const Boom = require('boom')
 class Orders {
   index (request, h) {
-    const shouldForceRefresh = (request.query) ? request.query : false
+    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
     const apiKey = process.env.BITTREX_API_KEY // TODO: Get from db
     const apiSecret = process.env.BITTREX_API_SECRET // TODO: Get from db

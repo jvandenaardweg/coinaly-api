@@ -90,14 +90,19 @@ server.route({
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/markets',
-  handler: marketsController.index,
-  config: {
-    plugins: {
-      'hapi-newrelic': {
-        transactionName: 'markets'
-      }
-    }
-  }
+  handler: marketsController.index
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/markets/fetch',
+  handler: marketsController.fetch
+})
+
+server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/markets/load',
+  handler: marketsController.load
 })
 
 server.route({
