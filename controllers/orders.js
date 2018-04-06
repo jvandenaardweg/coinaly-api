@@ -8,17 +8,11 @@ class Orders {
     const apiSecret = process.env.BITTREX_API_SECRET // TODO: Get from db
     const exchangeWorker = new PrivateExchangeWorker(1, exchangeName, apiKey, apiSecret)
 
-
-    // 1. Check redis cache for balance
-    // 2. if not in cache, do a call, and cache it
-    // 3. if shouldForceRefresh is true, delete the cache, get new balance, store in cache
-
     return (async () => {
       try {
         const result = await exchangeWorker.fetchOrders()
         return result
       } catch (error) {
-        // console.log('CATCH', error)
         return Boom.badImplementation(error)
       }
     })()

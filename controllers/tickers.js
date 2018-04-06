@@ -7,11 +7,6 @@ class Tickers {
     const exchangeWorker = new PublicExchangeWorker(exchangeName)
     const symbol = request.query.symbol
 
-    // 1. Check redis cache for balance
-    // 2. if not in cache, do a call, and cache it
-    // 3. if shouldForceRefresh is true, delete the cache, get new balance, store in cache
-
-    // redis key: public:exchanges:bittrex:tickers
     return (async () => {
       try {
         let result
@@ -23,7 +18,6 @@ class Tickers {
 
         return result
       } catch (error) {
-        // console.log('CATCH', error)
         return Boom.badImplementation(error)
       }
     })()
