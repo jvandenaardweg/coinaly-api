@@ -1,4 +1,4 @@
-const ExchangeWorker = require('../workers/exchange')
+const PublicExchangeWorker = require('../workers/public')
 const Boom = require('boom')
 class Markets {
   index (request, h) {
@@ -6,7 +6,7 @@ class Markets {
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
     const apiKey = process.env.BITTREX_API_KEY // TODO: Get from db
     const apiSecret = process.env.BITTREX_API_SECRET // TODO: Get from db
-    const exchangeWorker = new ExchangeWorker(1, exchangeName, apiKey, apiSecret)
+    const exchangeWorker = new PublicExchangeWorker(exchangeName)
 
 
     // 1. Check redis cache for balance
