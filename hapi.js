@@ -107,8 +107,8 @@ server.route({
 
 server.route({
   method: 'GET',
-  path: '/exchanges/{exchange}/tickers',
-  handler: tickersController.index
+  path: '/exchanges/{exchange}/tickers/{symbol?}',
+  handler: tickersController.show
 })
 
 server.route({

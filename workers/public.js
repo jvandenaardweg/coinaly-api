@@ -7,11 +7,16 @@ class PublicExchangeWorker extends ExchangeWorker {
 
   // Public
   // Markets are cached for 1 hour
-  async fetchMarkets () {
+  async fetchMarkets (forceRefresh) {
     console.log('Exchange Worker (public):', 'Fetch Markets')
     const cacheKey = `public:exchanges:markets:fetch:${this.exchangeSlug}`
 
     try {
+      if (forceRefresh) {
+        console.log('Exchange Worker (public):', 'Remove Fetch Markets Cache')
+        await this.deleteCache(cacheKey)
+      }
+
       let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
@@ -28,11 +33,16 @@ class PublicExchangeWorker extends ExchangeWorker {
 
   // Public
   // Markets are cached for 1 hour
-  async loadMarkets () {
+  async loadMarkets (forceRefresh) {
     console.log('Exchange Worker (public):', 'Load Markets')
     const cacheKey = `public:exchanges:markets:load:${this.exchangeSlug}`
 
     try {
+      if (forceRefresh) {
+        console.log('Exchange Worker (public):', 'Remove Load Markets Cache')
+        await this.deleteCache(cacheKey)
+      }
+
       let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
@@ -49,16 +59,47 @@ class PublicExchangeWorker extends ExchangeWorker {
 
   // Public
   // Tickers are cached for 5 seconds
-  async fetchTickers () {
+  async fetchTickers (forceRefresh) {
     console.log('Exchange Worker (public):', 'Fetch Tickers')
     const cacheKey = `public:exchanges:markets:tickers:${this.exchangeSlug}`
 
     try {
+      if (forceRefresh) {
+        console.log('Exchange Worker (public):', 'Remove Fetch Tickers Cache')
+        await this.deleteCache(cacheKey)
+      }
+
       let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
       } else {
         result = await this.ccxt.fetchTickers()
+        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
+      }
+      return result
+    }  catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Public
+  // Ticker is cached for 5 seconds
+  async fetchTicker (symbol, forceRefresh) {
+    console.log('Exchange Worker (public):', 'Fetch Ticker', symbol)
+    const cacheKey = `public:exchanges:markets:ticker:${this.exchangeSlug}:${symbol}`
+
+    try {
+      if (forceRefresh) {
+        console.log('Exchange Worker (public):', 'Remove Fetch Ticker Cache')
+        await this.deleteCache(cacheKey)
+      }
+
+      let result = await this.getCache(cacheKey)
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        result = await this.ccxt.fetchTicker(symbol)
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
       }
