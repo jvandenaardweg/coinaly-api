@@ -1,10 +1,12 @@
 'use strict'
-const port = process.env.PORT || 5000
-const Hapi = require('hapi')
-
-// Error reporting
+// Error reporting monitoring
+require('newrelic')
 const Raven = require('raven')
 Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f73f18971@sentry.io/1098123').install();
+
+// Base
+const port = process.env.PORT || 5000
+const Hapi = require('hapi')
 
 // Route controllers
 const balancesController = require('./controllers/balances')
@@ -13,6 +15,7 @@ const usersController = require('./controllers/users')
 const depositsController = require('./controllers/deposits')
 const withdrawalsController = require('./controllers/withdrawals')
 const marketsController = require('./controllers/markets')
+const tickersController = require('./controllers/tickers')
 
 // Create the server
 const server = Hapi.server({
@@ -68,14 +71,37 @@ server.route({
 })
 
 server.route({
+  method: 'GET',
+  path: '/exchanges/{exchange}/tickers',
+  handler: tickersController.index
+})
+
+server.route({
   method: 'POST',
   path: '/users',
   handler: usersController.create
 })
 
+const options = {
+  ops: {
+    interval: 5000
+  },
+  reporters: {
+    console: [{
+      module: 'good-console'
+    }, 'stdout']
+  }
+}
+
 const init = async () => {
+  await server.register({
+    plugin: require('good'),
+    options
+  })
   await server.start()
   console.log(`Coinaly API: Server running at: ${server.info.uri}`)
+
+
 }
 
 process.on('unhandledRejection', (err) => {

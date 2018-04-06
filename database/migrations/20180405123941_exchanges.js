@@ -1,7 +1,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.createTable('exchanges', function (table) {
-    table.increments()
+    table.increments('id').primary().unsigned()
     table.string('name').notNullable().unique()
     table.string('slug').notNullable().unique()
     table.string('url').notNullable()

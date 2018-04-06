@@ -1,6 +1,6 @@
 const ExchangeWorker = require('../workers/exchange')
 const Boom = require('boom')
-class Balances {
+class Tickers {
   index (request, h) {
     const shouldForceRefresh = (request.query) ? request.query : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
@@ -15,7 +15,7 @@ class Balances {
 
     return (async () => {
       try {
-        const result = await exchangeWorker.fetchBalance()
+        const result = await exchangeWorker.fetchTickers()
         return result
       } catch (error) {
         // console.log('CATCH', error)
@@ -24,4 +24,4 @@ class Balances {
     })()
   }
 }
-module.exports = new Balances()
+module.exports = new Tickers()

@@ -6,8 +6,8 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       // Inserts seed entries
       return knex('users').insert([
-        {id: '656f3235-0c5c-466f-ba9c-232471b96bdc', email: 'jordyvandenaardweg@gmail.com', password: 'testtest'},
-        {id: '1ca9deba-96e8-41d9-aa66-70d585b9f134', email: 'info@coinaly.io', password: 'testtest'},
+        {id: 1, email: 'jordyvandenaardweg@gmail.com', password: 'testtest', nickname: null, email_verified: false},
+        {id: 2, email: 'info@coinaly.io', password: 'testtest', nickname: null, email_verified: false},
       ]);
     });
 };

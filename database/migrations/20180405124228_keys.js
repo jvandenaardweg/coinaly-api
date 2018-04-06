@@ -1,11 +1,10 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.createTable('keys', function (table) {
-    table.uuid('user_id').notNullable()
-    table.integer('exchange_id').notNullable()
+    table.integer('user_id').notNullable().unsigned()
+    table.integer('exchange_id').notNullable().unsigned()
     table.string('api_key').notNullable()
     table.string('api_secret').notNullable()
-    table.string('salt').notNullable()
 
     // Set relationships
     table.foreign('exchange_id').references('id').inTable('exchanges').onDelete('CASCADE')
