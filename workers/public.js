@@ -2,22 +2,26 @@ const ExchangeWorker = require('./exchange')
 const redis = require('../cache/redis')
 class PublicExchangeWorker extends ExchangeWorker {
   constructor (exchangeSlug) {
-    super(null, exchangeSlug, null, null)
+    super('public', exchangeSlug)
+    console.log(`Exchange Worker (${this.type}):`, `Instance for ${this.exchangeSlug} created.`)
   }
 
   // Public
   // Markets are cached for 1 hour
   async fetchMarkets (forceRefresh) {
-    console.log('Exchange Worker (public):', 'Fetch Markets')
+    console.log(`Exchange Worker (${this.type}):`, 'Fetch Markets')
     const cacheKey = `public:exchanges:markets:fetch:${this.exchangeSlug}`
 
     try {
+      let result
+
       if (forceRefresh) {
-        console.log('Exchange Worker (public):', 'Remove Fetch Markets Cache')
+        console.log(`Exchange Worker (${this.type}):`, 'Remove Fetch Markets Cache')
         await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
       }
 
-      let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
       } else {
@@ -34,16 +38,19 @@ class PublicExchangeWorker extends ExchangeWorker {
   // Public
   // Markets are cached for 1 hour
   async loadMarkets (forceRefresh) {
-    console.log('Exchange Worker (public):', 'Load Markets')
+    console.log(`Exchange Worker (${this.type}):`, 'Load Markets')
     const cacheKey = `public:exchanges:markets:load:${this.exchangeSlug}`
 
     try {
+      let result
+
       if (forceRefresh) {
-        console.log('Exchange Worker (public):', 'Remove Load Markets Cache')
+        console.log(`Exchange Worker (${this.type}):`, 'Remove Load Markets Cache')
         await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
       }
 
-      let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
       } else {
@@ -60,16 +67,19 @@ class PublicExchangeWorker extends ExchangeWorker {
   // Public
   // Tickers are cached for 5 seconds
   async fetchTickers (forceRefresh) {
-    console.log('Exchange Worker (public):', 'Fetch Tickers')
+    console.log(`Exchange Worker (${this.type})`, 'Fetch Tickers')
     const cacheKey = `public:exchanges:markets:tickers:${this.exchangeSlug}`
 
     try {
+      let result
+
       if (forceRefresh) {
-        console.log('Exchange Worker (public):', 'Remove Fetch Tickers Cache')
+        console.log(`Exchange Worker (${this.type}):`, 'Remove Fetch Tickers Cache')
         await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
       }
 
-      let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
       } else {
@@ -86,16 +96,19 @@ class PublicExchangeWorker extends ExchangeWorker {
   // Public
   // Ticker is cached for 5 seconds
   async fetchTicker (symbol, forceRefresh) {
-    console.log('Exchange Worker (public):', 'Fetch Ticker', symbol)
+    console.log(`Exchange Worker (${this.type}):`, 'Fetch Ticker', symbol)
     const cacheKey = `public:exchanges:markets:ticker:${this.exchangeSlug}:${symbol}`
 
     try {
+      let result
+
       if (forceRefresh) {
-        console.log('Exchange Worker (public):', 'Remove Fetch Ticker Cache')
+        console.log(`Exchange Worker (${this.type}):`, 'Remove Fetch Ticker Cache')
         await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
       }
 
-      let result = await this.getCache(cacheKey)
       if (result) {
         result = JSON.parse(result)
       } else {

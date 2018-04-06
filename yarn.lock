@@ -1813,10 +1813,6 @@ handlebars@^4.0.3:
   optionalDependencies:
     uglify-js "^2.6"
 
-hapi-newrelic@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/hapi-newrelic/-/hapi-newrelic-1.1.0.tgz#6eeff2037a2a10ca01123a75e3a108d19e82420b"
-
 hapi@^17.3.1:
   version "17.3.1"
   resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.3.1.tgz#d99679d208389e12a13a91f55932b32ab7dceff1"

@@ -7,7 +7,6 @@ Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f7
 // Base
 const port = process.env.PORT || 5000
 const Hapi = require('hapi')
-const HapiNewRelic = require('hapi-newrelic')
 
 // Route controllers
 const balancesController = require('./controllers/balances')
@@ -46,27 +45,13 @@ server.route({
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/balances',
-  handler: balancesController.index,
-  config: {
-    plugins: {
-      'hapi-newrelic': {
-        transactionName: 'balances'
-      }
-    }
-  }
+  handler: balancesController.index
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/orders',
-  handler: ordersController.index,
-  config: {
-    plugins: {
-      'hapi-newrelic': {
-        transactionName: 'orders'
-      }
-    }
-  }
+  handler: ordersController.index
 })
 
 server.route({

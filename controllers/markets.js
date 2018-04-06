@@ -1,6 +1,12 @@
-const PublicExchangeWorker = require('../workers/public')
+const PublicExchangeWorkers = require('../workers/public-workers')
 const Boom = require('boom')
+
+
 class Markets {
+  constructor () {
+    // console.log('Controllers (markets):', 'Intance created.')
+  }
+
   index (request, h) {
     return {
       message: 'Nothing here. Endpoints are /fetch and /load'
@@ -10,11 +16,10 @@ class Markets {
   fetch (request, h) {
     const forceRefresh = (request.query.forceRefresh === "true") ? true : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const exchangeWorker = new PublicExchangeWorker(exchangeName)
 
     return (async () => {
       try {
-        const result = await exchangeWorker.fetchMarkets()
+        const result = await PublicExchangeWorkers[exchangeName].fetchMarkets(forceRefresh)
         return result
       } catch (error) {
         return Boom.badImplementation(error)
@@ -25,11 +30,10 @@ class Markets {
   load (request, h) {
     const forceRefresh = (request.query.forceRefresh === "true") ? true : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const exchangeWorker = new PublicExchangeWorker(exchangeName)
 
     return (async () => {
       try {
-        const result = await exchangeWorker.loadMarkets()
+        const result = await PublicExchangeWorkers[exchangeName].loadMarkets(forceRefresh)
         return result
       } catch (error) {
         return Boom.badImplementation(error)

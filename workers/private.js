@@ -1,17 +1,17 @@
 const ExchangeWorker = require('./exchange')
 const redis = require('../cache/redis')
 class PrivateExchangeWorker extends ExchangeWorker {
-  constructor (userId, exchangeSlug, apiKey, apiSecret) {
-    super(userId, exchangeSlug, apiKey, apiSecret)
+  constructor (type, exchangeSlug) {
+    super(type, exchangeSlug)
   }
 
   // Private
-  async fetchBalance (forceRefresh) {
-    console.log('Exchange Worker (private):', 'Fetch Balance', `/ User ID: ${this.userId}`)
+  async fetchBalance (forceRefresh, userId) {
+    console.log('Exchange Worker (private):', 'Fetch Balance', `/ User ID: ${userId}`)
     // TODO: throttle/limit this async function
 
 
-    const cacheKey = `private:exchanges:balance:${this.exchangeSlug}:${this.userId}`
+    const cacheKey = `private:exchanges:balance:${this.exchangeSlug}:${userId}`
 
     try {
       if (forceRefresh) {
@@ -34,9 +34,9 @@ class PrivateExchangeWorker extends ExchangeWorker {
   }
 
   // Private
-  async fetchOrders (forceRefresh) {
-    console.log('Exchange Worker (private):', 'Fetch Orders', `/ User ID: ${this.userId}`)
-    const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${this.userId}`
+  async fetchOrders (forceRefresh, userId) {
+    console.log('Exchange Worker (private):', 'Fetch Orders', `/ User ID: ${userId}`)
+    const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${userId}`
     // TODO: throttle/limit this async function
 
     try {
@@ -49,6 +49,7 @@ class PrivateExchangeWorker extends ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
+        // TODO: Binance requires a list of symbols to fetch the orders
         result = await this.ccxt.fetchOrders()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))

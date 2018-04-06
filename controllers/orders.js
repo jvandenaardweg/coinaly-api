@@ -1,16 +1,25 @@
-const PrivateExchangeWorker = require('../workers/private')
+let PrivateExchangeWorkers = require('../workers/private-workers')
 const Boom = require('boom')
 class Orders {
+  constructor () {
+    // console.log('Controllers (orders):', 'Intance created.')
+  }
+
   index (request, h) {
+    const userId = 1 // TODO: get from user session
     const forceRefresh = (request.query.forceRefresh === "true") ? true : false
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const apiKey = process.env.BITTREX_API_KEY // TODO: Get from db
-    const apiSecret = process.env.BITTREX_API_SECRET // TODO: Get from db
-    const exchangeWorker = new PrivateExchangeWorker(1, exchangeName, apiKey, apiSecret)
+
+    // TODO: use database to get keys, not use the public keys here
+    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
+
+    // Set key and secret for current user
+    PrivateExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey // TODO: get from db
+    PrivateExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret // TODO: get from db
 
     return (async () => {
       try {
-        const result = await exchangeWorker.fetchOrders(forceRefresh)
+        const result = await exchangeWorker.fetchOrders(forceRefresh, userId)
         return result
       } catch (error) {
         return Boom.badImplementation(error)

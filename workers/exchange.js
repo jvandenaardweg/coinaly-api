@@ -1,15 +1,17 @@
 const ccxt = require('ccxt')
 const redis = require('../cache/redis')
+const { getPublicApiKeySecret } = require('../helpers/api-keys')
 class ExchangeWorker {
-  constructor (userId, exchangeSlug, apiKey, apiSecret) {
+  constructor (type, exchangeSlug) {
     this.exchangeSlug = exchangeSlug.toLowerCase()
+    this.type = type
 
     // Determine to create a public or private instance
-    if (userId && apiKey && apiSecret) {
-      this.userId = userId
-      this.apiKey = apiKey
-      this.apiSecret = apiSecret
-      this.createPrivateCCXTInstance()
+    if (this.type === 'private') {
+      // this.userId = userId
+      // this.apiKey = apiKey
+      // this.apiSecret = apiSecret
+      this.createCCXTInstance()
     } else {
       this.createPublicCCXTInstance()
     }
@@ -21,14 +23,19 @@ class ExchangeWorker {
     const instanceId = `public-${this.exchangeSlug}`
     if (this.ccxt && this.ccxt.id === instanceId) return false
     try {
-      console.log('Exchange Worker', 'Create public instance')
+      console.log(`Exchange Worker (${this.type})`, `Creating public instance for ${this.exchangeSlug}...`)
+
+      const apiCredentials = getPublicApiKeySecret(this.exchangeSlug)
+
       this.ccxt = new ccxt[this.exchangeSlug]({
         id: instanceId,
-        apiKey: process.env.PUBLIC_BITTREX_API_KEY, // TODO: MAKE DYNAMIC
-        secret: process.env.PUBLIC_BITTREX_API_SECRET,// TODO: MAKE DYNAMIC
-        timeout: 15000
+        apiKey: apiCredentials.apiKey,
+        secret: apiCredentials.apiSecret,
+        timeout: 15000,
+        enableRateLimit: true
       })
     } catch (error) {
+      console.log(`Exchange Worker (${this.type})`, `Creating ${this.type} instance FAILED...`)
       this.handleCCXTInstanceError(error)
     }
   }
@@ -36,15 +43,13 @@ class ExchangeWorker {
   // A private instance has access to all API data, including; balance and orders
   // The results of this instance are only for a certain user.
   // ONLY THAT USER HAS ACCESS TO THESE RESPONSES
-  createPrivateCCXTInstance () {
+  createCCXTInstance () {
     // Create an CCXT instance per user
     try {
-      console.log('Exchange Worker', 'Create private instance')
+      console.log(`Exchange Worker (${this.type})`, `Creating ${this.type} instance for ${this.exchangeSlug}...`)
       this.ccxt = new ccxt[this.exchangeSlug]({
-        id: this.userId,
-        apiKey: this.apiKey,
-        secret: this.apiSecret,
-        timeout: 15000
+        timeout: 15000,
+        enableRateLimit: true
       })
     } catch (error) {
       this.handleCCXTInstanceError(error)
@@ -93,13 +98,13 @@ class ExchangeWorker {
   }
 
   async getCache (key) {
-    console.log('Exchange Worker:', 'Redis:', 'Get Cache', key)
+    console.log(`Exchange Worker (${this.type}):`, 'Redis:', 'Get Cache', key)
     const result = await redis.hget(key, 'all')
     return result
   }
 
   async setCache (key, data, expire = 3600) {
-    console.log('Exchange Worker:', 'Redis:', 'Set Cache', key)
+    console.log(`Exchange Worker (${this.type}):`, 'Redis:', 'Set Cache', key)
     const result = await redis.hset(key, 'all', data)
     redis.expire(key, expire) // Expire 3600 = 1 hour
     return result
