@@ -17,6 +17,9 @@ const withdrawalsController = require('./controllers/withdrawals')
 const marketsController = require('./controllers/markets')
 const tickersController = require('./controllers/tickers')
 
+// Route validations
+const routeValidations = require('./routes/validations')
+
 // Create the server
 const server = Hapi.server({
   port: port,
@@ -45,25 +48,46 @@ server.route({
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/balances',
-  handler: balancesController.index
+  handler: balancesController.index,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/orders',
-  handler: ordersController.index
+  handler: ordersController.index,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/orders/{status}',
-  handler: ordersController.indexStatus
+  handler: ordersController.indexStatus,
+  options: {
+    validate: routeValidations
+  }
+})
+
+server.route({
+  method: 'DELETE',
+  path: '/exchanges/{exchange}/orders/{uuid}',
+  handler: ordersController.delete,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/deposits',
-  handler: depositsController.index
+  handler: depositsController.index,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
@@ -75,25 +99,37 @@ server.route({
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/markets',
-  handler: marketsController.index
+  handler: marketsController.index,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/markets/fetch',
-  handler: marketsController.fetch
+  handler: marketsController.fetch,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/markets/load',
-  handler: marketsController.load
+  handler: marketsController.load,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({
   method: 'GET',
   path: '/exchanges/{exchange}/tickers/{symbol?}',
-  handler: tickersController.show
+  handler: tickersController.show,
+  options: {
+    validate: routeValidations
+  }
 })
 
 server.route({

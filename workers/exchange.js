@@ -6,45 +6,34 @@ class ExchangeWorker {
     this.exchangeSlug = exchangeSlug.toLowerCase()
     this.type = type
 
-    // Determine to create a public or private instance
-    if (this.type === 'private') {
-      // this.userId = userId
-      // this.apiKey = apiKey
-      // this.apiSecret = apiSecret
-      this.createCCXTInstance()
-    } else {
-      this.createPublicCCXTInstance()
-    }
+    this.createCCXTInstance()
   }
 
   // A public instance does not have access to private data, like; balance and orders
   // The results of this instance are cached heavily to not flood the API servers of the exchange
-  createPublicCCXTInstance () {
-    const instanceId = `public-${this.exchangeSlug}`
-    if (this.ccxt && this.ccxt.id === instanceId) return false
-    try {
-      console.log(`Exchange Worker (${this.type})`, `Creating public instance for ${this.exchangeSlug}...`)
+  // createPublicCCXTInstance () {
+  //   const instanceId = `public-${this.exchangeSlug}`
+  //   if (this.ccxt && this.ccxt.id === instanceId) return false
+  //   try {
+  //     console.log(`Exchange Worker (${this.type})`, `Creating public instance for ${this.exchangeSlug}...`)
 
-      const apiCredentials = getPublicApiKeySecret(this.exchangeSlug)
+  //     const apiCredentials = getPublicApiKeySecret(this.exchangeSlug)
 
-      this.ccxt = new ccxt[this.exchangeSlug]({
-        id: instanceId,
-        apiKey: apiCredentials.apiKey,
-        secret: apiCredentials.apiSecret,
-        timeout: 15000,
-        enableRateLimit: true
-      })
-    } catch (error) {
-      console.log(`Exchange Worker (${this.type})`, `Creating ${this.type} instance FAILED...`)
-      this.handleCCXTInstanceError(error)
-    }
-  }
+  //     this.ccxt = new ccxt[this.exchangeSlug]({
+  //       id: instanceId,
+  //       apiKey: apiCredentials.apiKey,
+  //       secret: apiCredentials.apiSecret,
+  //       timeout: 15000,
+  //       enableRateLimit: true
+  //     })
+  //   } catch (error) {
+  //     console.log(`Exchange Worker (${this.type})`, `Creating ${this.type} instance FAILED...`)
+  //     this.handleCCXTInstanceError(error)
+  //   }
+  // }
 
-  // A private instance has access to all API data, including; balance and orders
-  // The results of this instance are only for a certain user.
-  // ONLY THAT USER HAS ACCESS TO THESE RESPONSES
+  // Creates a CCXT instance, without API credentials
   createCCXTInstance () {
-    // Create an CCXT instance per user
     try {
       console.log(`Exchange Worker (${this.type})`, `Creating ${this.type} instance for ${this.exchangeSlug}...`)
       this.ccxt = new ccxt[this.exchangeSlug]({
