@@ -6,7 +6,7 @@ class Tickers {
   }
 
   show (request, h) {
-    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
+    const forceRefresh = request.query.forceRefresh
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
     // const exchangeWorker = new PublicExchangeWorker(exchangeName)
     const symbol = request.query.symbol

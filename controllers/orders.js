@@ -7,7 +7,7 @@ class Orders {
 
   index (request, h) {
     const userId = 1 // TODO: get from user session
-    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
+    const forceRefresh = request.query.forceRefresh
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     // TODO: use database to get keys, not use the public keys here

@@ -20,7 +20,7 @@ class Balances {
    */
   index (request, h) {
     const userId = 1 // TODO: get from request
-    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
+    const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     // TODO: use database to get keys, not use the public keys here
@@ -29,7 +29,7 @@ class Balances {
     // Set key and secret for current user
     PrivateExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
     PrivateExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
-
+    console.log('forcerefresh?', forceRefresh)
     return (async () => {
       try {
         const result = await PrivateExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)

@@ -14,7 +14,7 @@ class Markets {
   }
 
   fetch (request, h) {
-    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
+    const forceRefresh = request.query.forceRefresh
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     return (async () => {
@@ -28,7 +28,7 @@ class Markets {
   }
 
   load (request, h) {
-    const forceRefresh = (request.query.forceRefresh === "true") ? true : false
+    const forceRefresh = request.query.forceRefresh
     const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     return (async () => {
