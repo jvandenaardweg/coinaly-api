@@ -6,7 +6,8 @@ const validations = {
     status: Joi.string().valid('open', 'closed')
   },
   query: {
-    forceRefresh: Joi.boolean()
+    forceRefresh: Joi.boolean(),
+    symbol: Joi.string()
   }
 }
 

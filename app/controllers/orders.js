@@ -1,5 +1,6 @@
-let PrivateExchangeWorkers = require('../workers/private-workers')
+const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
+const { getPublicApiKeySecret } = require('../helpers/api-keys')
 class Orders {
   constructor () {
     // console.log('Controllers (orders):', 'Intance created.')
@@ -8,18 +9,18 @@ class Orders {
   index (request, h) {
     const userId = 1 // TODO: get from user session
     const forceRefresh = request.query.forceRefresh
-    const exchangeName = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     // TODO: use database to get keys, not use the public keys here
     const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
     // Set key and secret for current user
-    PrivateExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey // TODO: get from db
-    PrivateExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret // TODO: get from db
+    ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey // TODO: get from db
+    ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret // TODO: get from db
 
     return (async () => {
       try {
-        const result = await exchangeWorker.fetchOrders(forceRefresh, userId)
+        const result = await ExchangeWorkers[exchangeSlug].fetchOrders(forceRefresh, userId)
         return result
       } catch (error) {
         return Boom.badImplementation(error)

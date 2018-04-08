@@ -1,0 +1,6 @@
+.idea
+.git
+.github
+Dockerfile
+docker-compose.yml
+node_modules

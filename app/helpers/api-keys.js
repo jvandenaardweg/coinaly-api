@@ -17,7 +17,18 @@ function getPublicApiKeySecret (exchangeSlug) {
   }
 }
 
+function getPrivateApiKeySecret (exchangeSlug) {
+  let apiKey = null
+  let apiSecret = null
+
+  return {
+    apiKey: apiKey,
+    apiSecret: apiSecret
+  }
+}
+
 module.exports = {
-  getPublicApiKeySecret
+  getPublicApiKeySecret,
+  getPrivateApiKeySecret
 }
 

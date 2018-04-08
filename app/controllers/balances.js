@@ -1,10 +1,8 @@
 // let PrivateExchangeWorker = require('../workers/private')
-let PrivateExchangeWorkers = require('../workers/private-workers')
+const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
 const { getPublicApiKeySecret } = require('../helpers/api-keys')
 
-// Make PrivateExchangeWorkers re-usable
-let exchangeWorker = {}
 class Balances {
   constructor () {
     // console.log('Controllers (balances):', 'Intance created.')
@@ -23,16 +21,17 @@ class Balances {
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
-    // TODO: use database to get keys, not use the public keys here
-    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
-
-    // Set key and secret for current user
-    PrivateExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
-    PrivateExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
-    console.log('forcerefresh?', forceRefresh)
     return (async () => {
       try {
-        const result = await PrivateExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
+
+        // TODO: use database to get keys, not use the public keys here
+        const apiCredentials = getPublicApiKeySecret(exchangeSlug)
+
+        // Set key and secret for current user
+        ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
+        ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
+
+        const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
         return result
       } catch (error) {
         return Boom.badImplementation(error)
