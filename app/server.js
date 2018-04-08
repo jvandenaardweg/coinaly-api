@@ -3,7 +3,7 @@
 const newrelic = require('newrelic')
 const Raven = require('raven')
 Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f73f18971@sentry.io/1098123').install();
-const uuidv4 = require('uuid/v4')
+
 // Base
 // const port = process.env.PORT || 5000
 const Hapi = require('hapi')
@@ -20,7 +20,6 @@ const tickersController = require('./controllers/tickers')
 // Route validations
 const routeValidations = require('./routes/validations')
 
-console.log(uuidv4())
 // Create the server
 const server = Hapi.server({
   port: 5000,
