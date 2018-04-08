@@ -1,5 +1,11 @@
 # Getting started
 
+## Development
+1. Pull this repo
+2. Make sure you have set up Docker correctly
+3. Run: `npm run docker:dev`. When that's done, Docker runs in the background.
+4. Project is available at: http://localhost:5000
+
 ## Using Docker
 The `Dockerfile` is used for production.
 The `docker-compose.yml` is used for local development. It leverages `Dockerfile`, but uses different environment variables and a different run command to start.
@@ -9,10 +15,7 @@ The `docker-compose.yml` is used for local development. It leverages `Dockerfile
 
 ### Changed Dockerfile or docker-compose file?
 1. Make a new image build: `docker-compose build`
-### Port not exposing?
-1. Check `docker-machine ip`. Does it not list a default?
-2. Run `docker-machine create default`
-3. Then: `docker-machine env default`
+
 
 ## Setup
 1. Make sure you got the right dependencies, see `package.json`
