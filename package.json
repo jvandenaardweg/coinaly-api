@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "forever app/server.js",
-    "dev": "nodemon app/server.js",
+    "dev": "nodemon -L app/server.js",
     "docs": "apidoc -i ./app/controllers -o ./docs/",
     "test": "jest",
     "loadtest:binance:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/binance/balances?forceRefresh=true",
