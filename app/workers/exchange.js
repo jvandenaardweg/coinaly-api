@@ -1,10 +1,25 @@
 const ccxt = require('ccxt')
-const redis = require('../cache/redis')
 
 class ExchangeWorker {
-  constructor (exchangeSlug) {
+  constructor (exchangeSlug, redis) {
     this.exchangeSlug = exchangeSlug.toLowerCase()
-    this.createCCXTInstance()
+    this.redis = redis
+    this.supportedExchanges = ['bittrex', 'binance']
+
+    if (this.supportedExchanges.includes(exchangeSlug)) {
+      this.createCCXTInstance()
+    } else {
+      throw new Error(`The exchange "${exchangeSlug}" is currently not supported.`)
+    }
+  }
+
+  setApiCredentials (apiKey, apiSecret) {
+    if (this.ccxt) {
+      this.ccxt.apiKey = apiKey
+      this.ccxt.secret = apiSecret
+    } else {
+      throw new Error('CCXT is not created in this instance, so we cannot set the API credentials.')
+    }
   }
 
   // Creates a CCXT instance, without API credentials
@@ -236,22 +251,22 @@ class ExchangeWorker {
 
   async getCache (key) {
     console.log(`Exchange Worker (redis):`, 'Get Cache', key)
-    const result = await redis.hget(key, 'all')
+    const result = await this.redis.hget(key, 'all')
     return result
   }
 
   async setCache (key, data, expire = 3600) {
     console.log(`Exchange Worker (redis):`, 'Set Cache', key)
-    const result = await redis.hset(key, 'all', data)
-    redis.expire(key, expire) // Expire 3600 = 1 hour
+    const result = await this.redis.hset(key, 'all', data)
+    this.redis.expire(key, expire) // Expire 3600 = 1 hour
     return result
   }
 
   async deleteCache (key) {
     console.log(`Exchange Worker (redis):`, 'Delete Cache', key)
-    const result = await redis.keys(key)
+    const result = await this.redis.keys(key)
     .then(keys => {
-      const pipeline = redis.pipeline()
+      const pipeline = this.redis.pipeline()
       keys.forEach(key => {
         pipeline.del(key)
       })

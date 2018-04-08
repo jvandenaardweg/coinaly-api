@@ -28,8 +28,7 @@ class Balances {
         const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
-        ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
+        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
         const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
         return result

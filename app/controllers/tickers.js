@@ -17,8 +17,7 @@ class Tickers {
       try {
         let result
 
-        ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
-        ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
+        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
         if (symbol) {
           result = await ExchangeWorkers[exchangeSlug].fetchTicker(symbol, forceRefresh) // Cached for 5 seconds

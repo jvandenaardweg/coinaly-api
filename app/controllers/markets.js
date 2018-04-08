@@ -22,8 +22,7 @@ class Markets {
       try {
         let result
 
-        ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
-        ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
+        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
         result = await ExchangeWorkers[exchangeSlug].fetchMarkets(forceRefresh)
         return result
@@ -42,8 +41,7 @@ class Markets {
       try {
         let result
 
-        ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey
-        ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret
+        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
         result = await ExchangeWorkers[exchangeSlug].loadMarkets(forceRefresh)
         return result

@@ -15,8 +15,7 @@ class Orders {
     const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
     // Set key and secret for current user
-    ExchangeWorkers[exchangeSlug].ccxt.apiKey = apiCredentials.apiKey // TODO: get from db
-    ExchangeWorkers[exchangeSlug].ccxt.secret = apiCredentials.apiSecret // TODO: get from db
+    ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
     return (async () => {
       try {
