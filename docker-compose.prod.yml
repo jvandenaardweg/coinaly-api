@@ -3,4 +3,6 @@ services:
   node:
     environment:
       NODE_ENV: "production"
+    ports:
+      - "80:5000"
     command: "npm start"

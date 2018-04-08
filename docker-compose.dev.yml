@@ -3,4 +3,6 @@ services:
   node:
     environment:
       NODE_ENV: "development"
+    ports:
+      - "5000:5000"
     command: "npm run dev"
