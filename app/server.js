@@ -5,7 +5,7 @@ const Raven = require('raven')
 Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f73f18971@sentry.io/1098123').install();
 
 // Base
-// const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000
 const Hapi = require('hapi')
 
 // Route controllers
@@ -22,7 +22,7 @@ const routeValidations = require('./routes/validations')
 
 // Create the server
 const server = Hapi.server({
-  port: 5000,
+  port: port,
   routes: {
     cors: {
       origin: ['http://localhost:8080'],
