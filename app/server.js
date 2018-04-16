@@ -25,7 +25,7 @@ const server = Hapi.server({
   port: port,
   routes: {
     cors: {
-      origin: ['http://localhost:8080'],
+      origin: ['http://localhost:8080', 'https://app.coinaly.io', 'https://coinaly.io'],
       credentials: true
     }
   },
