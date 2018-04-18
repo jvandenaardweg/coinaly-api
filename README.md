@@ -1,10 +1,23 @@
 # Getting started
 
 ## Development
-1. Pull this repo
-2. Make sure you have set up Docker correctly
-3. Run: `npm run docker:dev`. When that's done, Docker runs in the background.
-4. Project is available at: http://localhost:5000
+
+### Create your .env file
+Create your `.env` file in the project root, containing:
+```
+DATABASE_URL=postgres://postgres:5432
+REDIS_URL=redis://redis:6379
+ENCODE_SECRET=your-super-secret
+PGSSLMODE=require
+NODE_ENV=development
+```
+
+### Run the project locally
+1. Make sure you have set up Docker correctly
+2. Run: `docker-compose up`. When that's done, Docker runs in the background.
+3. Project is available at: http://localhost:5000
+
+Redis will run at port `6379`. Postgres wil run at port `5432`.
 
 ## Using Docker
 The `Dockerfile` is used for production.

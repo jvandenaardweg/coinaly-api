@@ -1,8 +1,19 @@
-version: "3"
+version: '2'
 services:
-  node:
-    build:
-      context: .
+  # web: takes Dockerfile when running docker-compose up
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file: .env
+    command: "npm run dev"
     volumes:
-      - .:/usr/container
-      - /usr/container/node_modules
+      - .:/opt/app
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

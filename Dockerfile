@@ -1,10 +1,12 @@
 FROM node:8.11.1
 
-WORKDIR /usr/container
+WORKDIR /opt/app
 
-COPY . /usr/container
+COPY . /opt/app
 
 RUN npm install -g forever
 RUN yarn install
 
 EXPOSE 5000
+
+CMD ["npm", "start"]
