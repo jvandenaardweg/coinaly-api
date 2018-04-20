@@ -6,6 +6,7 @@ let ExchangeWorkers = {}
 try {
   ExchangeWorkers['bittrex'] = new ExchangeWorker('bittrex', redis)
   ExchangeWorkers['binance'] = new ExchangeWorker('binance', redis)
+  ExchangeWorkers['poloniex'] = new ExchangeWorker('poloniex', redis)
 } catch (e) {
   console.log('Error creating all ExchangeWorkers', e)
 }

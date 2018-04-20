@@ -4,7 +4,7 @@ class ExchangeWorker {
   constructor (exchangeSlug, redis) {
     this.exchangeSlug = exchangeSlug.toLowerCase()
     this.redis = redis
-    this.supportedExchanges = ['bittrex', 'binance']
+    this.supportedExchanges = ['bittrex', 'binance', 'poloniex']
 
     if (this.supportedExchanges.includes(exchangeSlug)) {
       this.createCCXTInstance()

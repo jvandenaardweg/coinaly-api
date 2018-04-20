@@ -1,6 +1,5 @@
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
-const { getPublicApiKeySecret } = require('../helpers/api-keys')
 
 class Markets {
   constructor () {
@@ -16,13 +15,12 @@ class Markets {
   fetch (request, h) {
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
     return (async () => {
       try {
         let result
 
-        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
+        ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
 
         result = await ExchangeWorkers[exchangeSlug].fetchMarkets(forceRefresh)
         return result
@@ -35,13 +33,12 @@ class Markets {
   load (request, h) {
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
-    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
     return (async () => {
       try {
         let result
-
-        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
+        console.log(exchangeSlug)
+        ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
 
         result = await ExchangeWorkers[exchangeSlug].loadMarkets(forceRefresh)
         return result
