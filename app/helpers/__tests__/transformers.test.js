@@ -1,4 +1,4 @@
-const transformers = require('./transformers')
+const transformers = require('../transformers')
 
 describe('helpers/transformers', () => {
   it('returns transformed Cryptocompare objects', () => {
@@ -54,7 +54,9 @@ const expectedCoinmarketcap = {
     "name": "Bitcoin",
     "symbol": "BTC",
     "totalSupply": 16996625,
-    "rank": 1
+    "rank": 1,
+    "hasIcon": true,
+    "iconLocation": "/static/icons/cryptocurrencies/svg/color/btc.svg"
    },
    "ETH": {
     "availableSupply": 99018901,
@@ -62,7 +64,9 @@ const expectedCoinmarketcap = {
     "name": "Ethereum",
     "symbol": "ETH",
     "totalSupply": 99018901,
-    "rank": 2
+    "rank": 2,
+    "hasIcon": true,
+    "iconLocation": "/static/icons/cryptocurrencies/svg/color/eth.svg"
    }
 }
 

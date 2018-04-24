@@ -1,3 +1,5 @@
+const icons = require('../../node_modules/cryptocurrency-icons/manifest.json').icons
+
 function transformObjectsCryptocompare (objects) {
   /*
     "BTC": {
@@ -20,12 +22,20 @@ function transformObjectsCryptocompare (objects) {
     },
   */
   return Object.keys(objects).reduce((obj, key) => {
+    const symbolLower = objects[key].Symbol.toLowerCase()
+    const icon = icons.includes(symbolLower)
+    const hasIcon = (icon) ? true : false
+    const iconFilename = (hasIcon) ? `${symbolLower}.svg` : `generic.svg`
+
     obj[key] = {
       name: objects[key].CoinName,
       symbol: objects[key].Symbol,
+      symbolLower: symbolLower,
       fullName: objects[key].FullName,
       totalSupply: parseFloat(objects[key].TotalCoinSupply),
-      isTrading: objects[key].IsTrading
+      isTrading: objects[key].IsTrading,
+      hasIcon: hasIcon,
+      iconLocation: `/static/icons/cryptocurrencies/svg/color/${iconFilename}`
     }
     return obj
   }, {})
@@ -52,13 +62,21 @@ function transformObjectsCoinmarketcap (objects) {
     }
   */
   return objects.reduce((obj, key) => {
+    const symbolLower = key.symbol.toLowerCase()
+    const icon = icons.includes(symbolLower)
+    const hasIcon = (icon) ? true : false
+    const iconFilename = (hasIcon) ? `${symbolLower}.svg` : `generic.svg`
+
     obj[key.symbol] = {
       name: key.name,
       symbol: key.symbol,
+      symbolLower: symbolLower,
       totalSupply: (key.total_supply) ? parseFloat(key.total_supply) : null,
       availableSupply: (key.available_supply) ? parseFloat(key.available_supply) : null,
       maxSupply: (key.max_supply) ? parseFloat(key.max_supply) : null,
-      rank: (key.rank) ? parseFloat(key.rank) : null
+      rank: (key.rank) ? parseFloat(key.rank) : null,
+      hasIcon: hasIcon,
+      iconLocation: `/static/icons/cryptocurrencies/svg/color/${iconFilename}`
     }
     return obj
   }, {})

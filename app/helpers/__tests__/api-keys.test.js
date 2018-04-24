@@ -1,4 +1,4 @@
-const apiKeys = require('./api-keys')
+const apiKeys = require('../api-keys')
 
 describe('helpers/api-keys', () => {
   it('returns public keys', () => {

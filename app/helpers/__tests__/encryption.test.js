@@ -1,4 +1,4 @@
-const encryption = require('./encryption')
+const encryption = require('../encryption')
 
 describe('helpers/encryption', () => {
   it('returns an encrypted string', () => {

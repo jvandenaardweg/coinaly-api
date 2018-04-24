@@ -1086,6 +1086,10 @@ crypto-random-string@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
 
+"cryptocurrency-icons@https://github.com/cjdowner/cryptocurrency-icons.git":
+  version "0.0.1"
+  resolved "https://github.com/cjdowner/cryptocurrency-icons.git#f31fb4bf8371f113d502036bae066d3d88fb2980"
+
 cryptorjs@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cryptorjs/-/cryptorjs-2.1.0.tgz#248daeb3e372ab9d210d8b866e735b4eabcfbcb5"
