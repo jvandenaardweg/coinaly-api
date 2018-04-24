@@ -14,6 +14,7 @@
     "dev": "nodemon -L app/server.js",
     "docs": "apidoc -i ./app/controllers -o ./docs/",
     "test": "jest --forceExit",
+    "test:watch": "jest --watch --notify",
     "loadtest:binance:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/binance/balances?forceRefresh=true",
     "loadtest:bittrex:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/bittrex/balances?forceRefresh=true",
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
