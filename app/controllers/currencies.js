@@ -8,33 +8,12 @@ class Currencies {
     return (async () => {
       try {
 
-        // TODO : get from coinmarketcap
-        const result = await fetch('https://min-api.cryptocompare.com/data/all/coinlist').then(response => response.json())
-        // const result = await fetch('https://api.coinmarketcap.com/v1/ticker/?limit=0').then(response => response.json())
+        // const result = await fetch('https://min-api.cryptocompare.com/data/all/coinlist').then(response => response.json())
+        const result = await fetch('https://api.coinmarketcap.com/v1/ticker/?limit=0').then(response => response.json())
+        // const transformedResult = transformers.transformObjectsCryptocompare(result.Data)
+        const transformedResult = transformers.transformObjectsCoinmarketcap(result)
 
-        const newResult = transformers.transformObjects(result.Data)
-
-        /*
-        "BTC": {
-          "Id": "1182",
-          "Url": "/coins/btc/overview",
-          "ImageUrl": "/media/19633/btc.png",
-          "Name": "BTC",
-          "Symbol": "BTC",
-          "CoinName": "Bitcoin",
-          "FullName": "Bitcoin (BTC)",
-          "Algorithm": "SHA256",
-          "ProofType": "PoW",
-          "FullyPremined": "0",
-          "TotalCoinSupply": "21000000",
-          "PreMinedValue": "N/A",
-          "TotalCoinsFreeFloat": "N/A",
-          "SortOrder": "1",
-          "Sponsored": false,
-          "IsTrading": true
-          },
-        */
-        return newResult
+        return transformedResult
       } catch (error) {
         return Boom.badImplementation(error)
       }
