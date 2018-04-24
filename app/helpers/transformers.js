@@ -25,7 +25,7 @@ function transformObjectsCryptocompare (objects) {
     const symbolLower = objects[key].Symbol.toLowerCase()
     const icon = icons.includes(symbolLower)
     const hasIcon = (icon) ? true : false
-    const iconFilename = (hasIcon) ? `${symbolLower}.svg` : `generic.svg`
+    const iconLocation = (hasIcon) ? `/static/icons/cryptocurrencies/svg/color/${symbolLower}.svg` : `/static/icons/cryptocurrencies/svg/black/generic.svg`
 
     obj[key] = {
       name: objects[key].CoinName,
@@ -35,7 +35,7 @@ function transformObjectsCryptocompare (objects) {
       totalSupply: parseFloat(objects[key].TotalCoinSupply),
       isTrading: objects[key].IsTrading,
       hasIcon: hasIcon,
-      iconLocation: `/static/icons/cryptocurrencies/svg/color/${iconFilename}`
+      iconLocation: iconLocation
     }
     return obj
   }, {})
@@ -65,7 +65,7 @@ function transformObjectsCoinmarketcap (objects) {
     const symbolLower = key.symbol.toLowerCase()
     const icon = icons.includes(symbolLower)
     const hasIcon = (icon) ? true : false
-    const iconFilename = (hasIcon) ? `${symbolLower}.svg` : `generic.svg`
+    const iconLocation = (hasIcon) ? `/static/icons/cryptocurrencies/svg/color/${symbolLower}.svg` : `/static/icons/cryptocurrencies/svg/black/generic.svg`
 
     obj[key.symbol] = {
       name: key.name,
@@ -76,7 +76,7 @@ function transformObjectsCoinmarketcap (objects) {
       maxSupply: (key.max_supply) ? parseFloat(key.max_supply) : null,
       rank: (key.rank) ? parseFloat(key.rank) : null,
       hasIcon: hasIcon,
-      iconLocation: `/static/icons/cryptocurrencies/svg/color/${iconFilename}`
+      iconLocation: iconLocation
     }
     return obj
   }, {})
