@@ -8,6 +8,9 @@ Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f7
 const port = process.env.PORT || 5000
 const Hapi = require('hapi')
 
+require('es6-promise').polyfill()
+require('isomorphic-fetch')
+
 // Route controllers
 const balancesController = require('./controllers/balances')
 const ordersController = require('./controllers/orders')
@@ -16,6 +19,7 @@ const depositsController = require('./controllers/deposits')
 const withdrawalsController = require('./controllers/withdrawals')
 const marketsController = require('./controllers/markets')
 const tickersController = require('./controllers/tickers')
+const currenciesController = require('./controllers/currencies')
 
 // Route validations
 const routeValidations = require('./routes/validations')
@@ -142,6 +146,13 @@ server.route({
   path: '/users',
   handler: usersController.create
 })
+
+server.route({
+  method: 'GET',
+  path: '/currencies',
+  handler: currenciesController.index
+})
+
 
 // Set correct New Relic transaction naming
 server.ext('onRequest', function (request, h) {
