@@ -5,17 +5,26 @@
 ### Create your .env file
 Create your `.env` file in the project root, containing:
 ```
-DATABASE_URL=postgres://postgres:5432
-REDIS_URL=redis://redis:6379
-ENCODE_SECRET=your-super-secret
-PGSSLMODE=require
 NODE_ENV=development
+
+DATABASE_URL=postgres://coinaly:coinaly@postgres:5432/coinaly
+REDIS_URL=redis://redis:6379
+
+ENCODE_SECRET=your-super-secret
+
+POSTGRES_PASSWORD=coinaly
+POSTGRES_USER=coinaly
+POSTGRES_DB=coinaly
 ```
 
 ### Run the project locally
 1. Make sure you have set up Docker correctly
 2. Run: `docker-compose up`. When that's done, Docker runs in the background.
-3. Project is available at: http://localhost:5000
+3. Open the Postgres database in a client
+4. Run: `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+5. Restart
+6. Run migrations: `npm run dev:migrate`
+4. Project is available at: http://localhost:5000
 
 Redis will run at port `6379`. Postgres wil run at port `5432`.
 

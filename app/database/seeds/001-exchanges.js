@@ -5,8 +5,9 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       // Inserts seed entries
       return knex('exchanges').insert([
-        {id: 1, name: 'Bittrex', slug: 'bittrex', url: 'https://bittrex.com', active: true},
-        {id: 2, name: 'Binance', slug: 'binance', url: 'https://binance.com', active: false}
+        {id: 1, name: 'Bittrex', slug: 'bittrex', url: 'https://bittrex.com', active: true, created_at: new Date()},
+        {id: 2, name: 'Binance', slug: 'binance', url: 'https://binance.com', active: true, created_at: new Date()},
+        {id: 3, name: 'Poloniex', slug: 'poloniex', url: 'https://poloniex.com', active: true, created_at: new Date()}
       ]);
     });
 };

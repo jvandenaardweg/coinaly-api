@@ -11,15 +11,19 @@
   },
   "scripts": {
     "start": "forever app/server.js",
-    "dev": "nodemon -L app/server.js",
     "docs": "apidoc -i ./app/controllers -o ./docs/",
     "test": "jest --forceExit",
     "test:watch": "jest --watch --notify",
     "loadtest:binance:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/binance/balances?forceRefresh=true",
     "loadtest:bittrex:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/bittrex/balances?forceRefresh=true",
-    "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
-    "docker:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d",
-    "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up"
+    "dev": "nodemon -L app/server.js",
+    "dev:migrate": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run migrate:latest\"",
+    "dev:migrate:rollback": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run migrate:rollback\"",
+    "dev:seed": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run seed:run\"",
+    "dev:test:watch": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run test:watch\"",
+    "migrate:latest": "knex migrate:latest --knexfile app/knexfile.js",
+    "migrate:rollback": "knex migrate:rollback --knexfile app/knexfile.js",
+    "seed:run": "knex seed:run --knexfile app/knexfile.js"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -38,6 +42,7 @@
   },
   "dependencies": {
     "apidoc": "^0.17.6",
+    "bcrypt": "^2.0.1",
     "boom": "^7.2.0",
     "catbox-redis": "^4.1.0",
     "ccxt": "^1.12.94",

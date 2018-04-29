@@ -1,4 +1,4 @@
-// const GUID = require('node-uuid')
+const GUID = require('node-uuid')
 
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
@@ -6,8 +6,8 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       // Inserts seed entries
       return knex('users').insert([
-        {id: 1, email: 'jordyvandenaardweg@gmail.com', password: 'testtest', nickname: null, email_verified: false},
-        {id: 2, email: 'info@coinaly.io', password: 'testtest', nickname: null, email_verified: false},
+        {id: '17a4e26c-c2e5-4ab7-856b-f7f99ec2cb99', email: 'jordyvandenaardweg@gmail.com', password: 'testtest', created_at: new Date()},
+        {id: 'eab6377a-c073-44ac-90d7-f248a47915ed', email: 'info@coinaly.io', password: 'testtest', created_at: new Date()}
       ]);
     });
 };

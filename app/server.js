@@ -7,6 +7,7 @@ Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f7
 // Base
 const port = process.env.PORT || 5000
 const Hapi = require('hapi')
+const Joi = require('joi')
 
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
@@ -20,6 +21,7 @@ const withdrawalsController = require('./controllers/withdrawals')
 const marketsController = require('./controllers/markets')
 const tickersController = require('./controllers/tickers')
 const currenciesController = require('./controllers/currencies')
+const keysController = require('./controllers/keys')
 
 // Route validations
 const routeValidations = require('./routes/validations')
@@ -144,7 +146,30 @@ server.route({
 server.route({
   method: 'POST',
   path: '/users',
-  handler: usersController.create
+  handler: usersController.create,
+  options: {
+    validate: {
+      payload: {
+        email: Joi.string().email(),
+        password: Joi.string()
+      }
+    }
+  }
+})
+
+server.route({
+  method: 'POST',
+  path: '/keys',
+  handler: keysController.create,
+  options: {
+    validate: {
+      payload: {
+        apiKey: Joi.string().required(),
+        apiSecret: Joi.string().required(),
+        exchange: Joi.string().required()
+      }
+    }
+  }
 })
 
 server.route({
