@@ -12,7 +12,7 @@
   "scripts": {
     "start": "forever app/server.js",
     "docs": "apidoc -i ./app/controllers -o ./docs/",
-    "test": "jest --forceExit",
+    "test": "jest --coverage --forceExit",
     "test:watch": "jest --watch --notify",
     "loadtest:binance:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/binance/balances?forceRefresh=true",
     "loadtest:bittrex:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/bittrex/balances?forceRefresh=true",
@@ -20,10 +20,10 @@
     "dev:migrate": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run migrate:latest\"",
     "dev:migrate:rollback": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run migrate:rollback\"",
     "dev:seed": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run seed:run\"",
-    "dev:test:watch": "docker exec -it api.coinaly.io-web /bin/sh -c \"npm run test:watch\"",
     "migrate:latest": "knex migrate:latest --knexfile app/knexfile.js",
     "migrate:rollback": "knex migrate:rollback --knexfile app/knexfile.js",
-    "seed:run": "knex seed:run --knexfile app/knexfile.js"
+    "seed:run": "knex seed:run --knexfile app/knexfile.js",
+    "postdeploy": "npm run migrate:latest"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -38,13 +38,12 @@
     ],
     "testEnvironment": "jest-environment-node",
     "coverageDirectory": "<rootDir>/test/unit/coverage",
-    "collectCoverage": true
+    "collectCoverage": false
   },
   "dependencies": {
     "apidoc": "^0.17.6",
     "bcrypt": "^2.0.1",
     "boom": "^7.2.0",
-    "catbox-redis": "^4.1.0",
     "ccxt": "^1.12.94",
     "compression": "^1.7.2",
     "connect-slashes": "^1.3.1",
@@ -59,10 +58,12 @@
     "good": "^8.1.1",
     "good-console": "^7.1.0",
     "hapi": "^17.3.1",
+    "hapi-auth-jwt2": "^8.1.0",
     "ioredis": "^3.2.2",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^22.4.3",
     "joi": "^13.1.2",
+    "jsonwebtoken": "^8.2.1",
     "knex": "^0.14.4",
     "newrelic": "^3.3.0",
     "node-uuid": "^1.4.8",

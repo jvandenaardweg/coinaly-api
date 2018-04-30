@@ -6,7 +6,7 @@ exports.up = function(knex, Promise) {
     table.string('slug').notNullable().unique()
     table.string('url').notNullable()
     table.boolean('active').defaultTo(true)
-    table.timestamps()
+    table.timestamps(false, true)
   })
 }
 

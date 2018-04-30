@@ -6,7 +6,7 @@ exports.up = function(knex, Promise) {
     table.string('password').notNullable()
     table.dateTime('activated_at').nullable().defaultsTo(null)
     table.dateTime('active_at').nullable().defaultsTo(null)
-    table.timestamps()
+    table.timestamps(false, true)
   })
 }
 

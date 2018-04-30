@@ -19,6 +19,7 @@ class Users {
 
       try {
         await knex('users').insert({email: email, password: passwordHash})
+        // TODO: send verification email
         return {
           message: 'User created.'
         }
@@ -34,20 +35,29 @@ class Users {
   }
 
   show (request, h) {
-    return {
-      message: 'show user'
-    }
+    return (async () => {
+      try {
+        const email = 'jordyvandenaardweg@gmail.com' // TODO: should be logged in user, but we use this for now for dev purposes
+        const user = await knex('users').where({email: email}).select('email', 'created_at', 'updated_at')
+        return {
+          ...user[0]
+        }
+      } catch (err) {
+        console.log('unknown error', err)
+        // return Boom.badImplementation('There was an error while creating a new user.')
+      }
+    })()
   }
 
   update (request, h) {
     return {
-      message: 'update user'
+      message: 'Should update current logged in user info'
     }
   }
 
   delete (request, h) {
     return {
-      message: 'delete user'
+      message: 'Should delete current logged in user'
     }
   }
 }

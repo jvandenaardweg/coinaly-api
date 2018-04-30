@@ -1,18 +1,18 @@
 version: '2'
 services:
   # web: takes Dockerfile when running docker-compose up
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    env_file: .env
-    command: bash -c "yarn install && npm run migrate:latest && npm run dev"
-    volumes:
-      - .:/opt/app
-    container_name: "api.coinaly.io-web"
-    depends_on:
-      - postgres
-      - redis
+  # web:
+  #   build: .
+  #   ports:
+  #     - "5000:5000"
+  #   env_file: .env
+  #   # command: bash -c "yarn install && npm run migrate:latest && npm run dev"
+  #   volumes:
+  #     - .:/opt/app
+  #   container_name: "api.coinaly.io-web"
+  #   depends_on:
+  #     - postgres
+  #     - redis
   postgres:
     image: postgres:latest
     env_file: .env

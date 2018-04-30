@@ -17,7 +17,8 @@ class Balances {
    * @apiSuccess {Object[]} balances List of balances.
    */
   index (request, h) {
-    const userId = 1 // TODO: get from request
+    console.log(request.auth.isAuthenticated, request.auth.credentials.id)
+    const userId = request.auth.credentials.id
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
