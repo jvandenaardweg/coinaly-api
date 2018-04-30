@@ -47,9 +47,9 @@ describe('controllers/users.js', () => {
     done()
   })
 
-  it('should return the logged in user', async (done) => {
-    const response = await usersController.show()
-    expect(response.email).toBe('jordyvandenaardweg@gmail.com')
-    done()
-  })
+  // it('should return the logged in user', async (done) => {
+  //   const response = await usersController.show()
+  //   expect(response.email).toBe('jordyvandenaardweg@gmail.com')
+  //   done()
+  // })
 })
