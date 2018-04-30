@@ -37,7 +37,6 @@ class Markets {
     return (async () => {
       try {
         let result
-        console.log(exchangeSlug)
         ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
 
         result = await ExchangeWorkers[exchangeSlug].loadMarkets(forceRefresh)
