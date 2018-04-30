@@ -51,6 +51,9 @@ const init = async () => {
       return {
         message: 'Hello! info@coinaly.io'
       }
+    },
+    options: {
+      auth: false
     }
   })
 
