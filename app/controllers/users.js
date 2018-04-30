@@ -35,16 +35,22 @@ class Users {
   }
 
   show (request, h) {
+    const userId = request.auth.credentials.id
+
     return (async () => {
       try {
-        const email = 'jordyvandenaardweg@gmail.com' // TODO: should be logged in user, but we use this for now for dev purposes
-        const user = await knex('users').where({email: email}).select('email', 'created_at', 'updated_at')
-        return {
-          ...user[0]
+        const user = await knex('users').where({id: userId}).select('email', 'created_at', 'updated_at', 'activated_at', 'active_at')
+        if (user.length) {
+          return {
+            ...user[0]
+          }
+        } else {
+          return Boom.notFound('User not found.')
         }
+
       } catch (err) {
         console.log('unknown error', err)
-        // return Boom.badImplementation('There was an error while creating a new user.')
+        return Boom.badImplementation('There was an error while retrieving the user.')
       }
     })()
   }
@@ -56,9 +62,23 @@ class Users {
   }
 
   delete (request, h) {
-    return {
-      message: 'Should delete current logged in user'
-    }
+    const userId = request.auth.credentials.id
+
+    return (async () => {
+      try {
+        const deletedUser = await knex('users').where({ id: userId }).del()
+        if (deletedUser) {
+          return {
+            totalDeleted: deletedUser
+          }
+        } else {
+          return Boom.badRequest('Nothing to delete. User does not exist.')
+        }
+      } catch (err) {
+        console.log('Unknown error while deleting the user.', err)
+        return Boom.badImplementation('There was an error while deleting the user.')
+      }
+    })()
   }
 }
 module.exports = new Users()

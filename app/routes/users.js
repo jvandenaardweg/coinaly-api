@@ -24,5 +24,13 @@ module.exports = [
         }
       }
     }
+  },
+  {
+    method: 'DELETE',
+    path: '/users/me',
+    handler: usersController.delete,
+    options: {
+      auth: 'jwt'
+    }
   }
 ]
