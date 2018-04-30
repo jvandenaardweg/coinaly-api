@@ -23,7 +23,7 @@
     "migrate:latest": "knex migrate:latest --knexfile app/knexfile.js",
     "migrate:rollback": "knex migrate:rollback --knexfile app/knexfile.js",
     "seed:run": "knex seed:run --knexfile app/knexfile.js",
-    "postdeploy": "npm run migrate:latest"
+    "heroku-postbuild": "npm run migrate:latest"
   },
   "jest": {
     "moduleFileExtensions": [
