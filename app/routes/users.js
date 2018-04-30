@@ -6,7 +6,10 @@ module.exports = [
   {
     method: 'GET',
     path: '/users/me',
-    handler: usersController.show
+    handler: usersController.show,
+    options: {
+      auth: 'jwt'
+    }
   },
   {
     method: 'POST',

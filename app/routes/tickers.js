@@ -8,7 +8,7 @@ module.exports = [
     path: '/exchanges/{exchange}/tickers/{symbol?}',
     handler: tickersController.show,
     options: {
-      auth: 'jwt',
+      auth: false,
       validate: routeValidations
     }
   }

@@ -8,7 +8,7 @@ module.exports = [
     path: '/exchanges/{exchange}/markets',
     handler: marketsController.index,
     options: {
-      auth: 'jwt',
+      auth: false,
       validate: routeValidations
     }
   },
@@ -17,7 +17,7 @@ module.exports = [
     path: '/exchanges/{exchange}/markets/load',
     handler: marketsController.load,
     options: {
-      auth: 'jwt',
+      auth: false,
       validate: routeValidations
     }
   },
@@ -26,7 +26,7 @@ module.exports = [
     path: '/exchanges/{exchange}/markets/fetch',
     handler: marketsController.fetch,
     options: {
-      auth: 'jwt',
+      auth: false,
       validate: routeValidations
     }
   }
