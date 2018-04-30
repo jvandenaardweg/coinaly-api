@@ -27,7 +27,7 @@ class Users {
         if (err.constraint === 'users_email_unique') {
           return Boom.conflict('E-mail address already exists')
         } else {
-          console.log('unknown error', err)
+          console.log('Unknown error while creating a new user', err)
           return Boom.badImplementation('There was an error while creating a new user.')
         }
       }

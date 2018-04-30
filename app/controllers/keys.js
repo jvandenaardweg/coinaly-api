@@ -24,10 +24,10 @@ class Keys {
           message: 'API key and secret saved securely.'
         }
       } catch (err) {
-        console.log('Unknown error while storing the API key and secret.', err)
         if (err.constraint === 'keys_user_id_exchange_id_unique') {
           return Boom.conflict('You already have an API key and secret combination for this exchange.')
         } else {
+          console.log('Unknown error while storing the API key and secret.', err)
           return Boom.badImplementation('There was an error while storing the API key and secret.')
         }
       }
