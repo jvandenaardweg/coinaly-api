@@ -16,7 +16,7 @@ module.exports = [
       auth: false,
       validate: {
         payload: {
-          email: Joi.string().email().required(),
+          email: Joi.string().email({ minDomainAtoms: 2 }).required(),
           password: Joi.string().required()
         }
       }
