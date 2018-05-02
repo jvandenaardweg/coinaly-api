@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'production') {
 
 function sendTemplate(opts) {
   return new Promise(function (resolve, reject) {
-    return mandrill_client.messages.sendTemplate(opts, resolve, reject)
+    mandrill_client.messages.sendTemplate(opts, resolve, reject)
   })
 }
 

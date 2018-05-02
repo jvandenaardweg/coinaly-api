@@ -15,7 +15,6 @@ const Hapi = require('hapi')
 const Joi = require('joi')
 
 require('es6-promise').polyfill()
-require('isomorphic-fetch')
 
 // JWT validation check to see if decoded user ID is valid
 const validateJwt = require('./validations/jwt')

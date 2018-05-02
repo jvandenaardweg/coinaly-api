@@ -12,6 +12,12 @@ describe('controllers/users.js', () => {
   })
 
   it('should create a user when given an email and password payload', async (done) => {
+    // jest.mock('../../email/mandrill',()=>{
+    //   return {
+    //     sendMail: jest.fn()
+    //   };
+    // });
+    // const { sendEmail } = require('../email/mandrill')
     const response = await usersController.create({
       payload: {
         email: 'test@coinaly.io',

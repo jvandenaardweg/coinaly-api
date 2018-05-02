@@ -24,7 +24,10 @@ class Users {
       try {
         verificationCode = randomstring.generate().toUpperCase()
         const createdUser = await knex('users').insert({email: email, password: passwordHash, verification: verificationCode}).returning(['id', 'email'])
+
+        // if (process.env.NODE_ENV !== 'test') {
         await sendEmail('signup-verify', email, verificationCode)
+        // }
 
         return {
           message: 'User created.',
