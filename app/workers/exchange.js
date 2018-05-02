@@ -29,7 +29,7 @@ class ExchangeWorker {
         timeout: 15000,
         enableRateLimit: true
       })
-      console.log(`Exchange Worker:`, `Worker instance for ${this.exchangeSlug} created.`)
+      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker:`, `Worker instance for ${this.exchangeSlug} created.`)
     } catch (error) {
       console.log(`Exchange Worker:`, `FAILED to create worker instance for ${this.exchangeSlug} created.`)
       this.handleCCXTInstanceError(error)
