@@ -65,11 +65,13 @@
     "joi": "^13.1.2",
     "jsonwebtoken": "^8.2.1",
     "knex": "^0.14.4",
+    "mandrill-api": "^1.0.45",
     "newrelic": "^3.3.0",
     "node-uuid": "^1.4.8",
     "nodemon": "^1.14.3",
     "ololog": "^1.1.83",
     "pg": "^7.4.1",
+    "randomstring": "^1.1.5",
     "raven": "^2.4.2"
   },
   "browserslist": [
@@ -79,5 +81,8 @@
   ],
   "main": "index.js",
   "repository": "git@github.com:jvandenaardweg/coinaly-api.git",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "run-func": "^1.0.2"
+  }
 }

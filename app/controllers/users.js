@@ -2,9 +2,13 @@ const knex = require('../database/knex')
 const bcrypt = require('bcrypt')
 const util = require('util')
 const Boom = require('boom')
+const { sendEmail } = require('../email/mandrill')
+const randomstring = require('randomstring')
+
 class Users {
   create (request, h) {
     let passwordHash
+    let verificationCode
     const saltRounds = 10
     const email = request.payload.email
     const plainTextPassword = request.payload.password
@@ -18,16 +22,19 @@ class Users {
       }
 
       try {
-        await knex('users').insert({email: email, password: passwordHash})
-        // TODO: send verification email
+        verificationCode = randomstring.generate().toUpperCase()
+        const createdUser = await knex('users').insert({email: email, password: passwordHash, verification: verificationCode}).returning(['id', 'email'])
+        await sendEmail('signup-verify', email, verificationCode)
+
         return {
-          message: 'User created.'
+          message: 'User created.',
+          user: createdUser[0]
         }
       } catch (err) {
         if (err.constraint === 'users_email_unique') {
           return Boom.conflict('E-mail address already exists')
         } else {
-          console.log('Unknown error while creating a new user', err)
+          // console.log('Unknown error while creating a new user', err)
           return Boom.badImplementation('There was an error while creating a new user.')
         }
       }
