@@ -1,4 +1,5 @@
 const authController = require('../controllers/auth')
+const Joi = require('joi')
 
 module.exports = [
   {
@@ -23,6 +24,19 @@ module.exports = [
     handler: authController.logout,
     options: {
       auth: 'jwt'
+    }
+  },
+  {
+    method: 'POST',
+    path: '/auth/verify',
+    handler: authController.verify,
+    options: {
+      auth: false,
+      validate: {
+        payload: {
+          verificationCode: Joi.string().required()
+        }
+      }
     }
   }
 ]

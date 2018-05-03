@@ -3,6 +3,7 @@ const knex = require('../database/knex')
 const bcrypt = require('bcrypt')
 const Boom = require('boom')
 const JWT = require('jsonwebtoken')
+const { verifyUser, getUserCredentialsByEmail } = require('../database/methods/users')
 
 class Auth {
 
@@ -18,7 +19,7 @@ class Auth {
 
     return (async () => {
       try {
-        user = await knex('users').where({email: email}).select('id', 'email', 'password', 'activated_at')
+        user = await getUserCredentialsByEmail(email)
       } catch (e) {
         return Boom.badImplementation('There was an error retrieving the user.')
       }
@@ -50,6 +51,28 @@ class Auth {
         return Boom.notFound('E-mail address is not found.')
       }
     })()
+  }
+
+  verify (request, h) {
+    const verificationCode = request.payload.verificationCode
+
+    return (async () => {
+      try {
+        const user = await verifyUser(verificationCode)
+        if (user.length) {
+          return {
+            message: 'Success!',
+            user: user[0]
+          }
+        } else {
+          return Boom.badRequest('There is no account to activate with this verification code.')
+        }
+      } catch (e) {
+        console.log('Error while verifiying the user', e)
+        return Boom.badImplementation('There was an error while verifying the user.')
+      }
+    })()
+
   }
 
   forgotPassword (request, h) {

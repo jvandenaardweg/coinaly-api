@@ -1,5 +1,8 @@
 const usersController = require('../users')
 const knex = require('../../database/knex')
+// const server = require('../../server')
+// import request from './request'
+
 describe('controllers/users.js', () => {
 
   afterEach( async(done) => {
@@ -12,6 +15,8 @@ describe('controllers/users.js', () => {
   })
 
   it('should create a user when given an email and password payload', async (done) => {
+
+    // import request from './request';
     // jest.mock('../../email/mandrill',()=>{
     //   return {
     //     sendMail: jest.fn()

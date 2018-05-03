@@ -1,6 +1,6 @@
 'use strict'
 require('dotenv').config({ path: '../.env' })
-const newrelic = require('newrelic')
+// const newrelic = require('newrelic')
 
 // Error reporting monitoring
 if (process.env.NODE_ENV === 'production') {
@@ -13,14 +13,14 @@ if (process.env.NODE_ENV === 'production') {
 const port = process.env.PORT || 5000
 const Hapi = require('hapi')
 const Joi = require('joi')
-
+let server
 require('es6-promise').polyfill()
 
 // JWT validation check to see if decoded user ID is valid
 const validateJwt = require('./validations/jwt')
 
 const init = async () => {
-  const server = Hapi.server({
+  server = Hapi.server({
     port: port,
     routes: {
       cors: {
@@ -82,7 +82,7 @@ const init = async () => {
         transactionName = transactionName.substr(1)
       }
 
-      newrelic.setTransactionName(transactionName)
+      // newrelic.setTransactionName(transactionName)
       return h.continue
     })
   }
@@ -100,3 +100,5 @@ process.on('unhandledRejection', (err) => {
 })
 
 init()
+
+module.exports = server

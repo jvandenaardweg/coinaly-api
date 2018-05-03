@@ -79,4 +79,6 @@ describe('controllers/auth.js', () => {
     expect(response.output.statusCode).toBe(400)
     done()
   })
+
+
 })
