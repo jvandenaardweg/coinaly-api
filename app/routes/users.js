@@ -33,5 +33,13 @@ module.exports = [
     options: {
       auth: 'jwt'
     }
+  },
+  {
+    method: 'GET',
+    path: '/users/delete/e2e',
+    handler: usersController.deleteE2ETestUser,
+    options: {
+      auth: false
+    }
   }
 ]

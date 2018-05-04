@@ -4,7 +4,7 @@ const util = require('util')
 const Boom = require('boom')
 const { sendEmail } = require('../email/mandrill')
 const randomstring = require('randomstring')
-const { createUser, showUser, deleteUser } = require('../database/methods/users')
+const { createUser, showUser, deleteUser, deleteUserByEmail } = require('../database/methods/users')
 
 class Users {
   create (request, h) {
@@ -72,6 +72,24 @@ class Users {
           }
         } else {
           return Boom.badRequest('Nothing to delete. User does not exist.')
+        }
+      } catch (err) {
+        console.log('Unknown error while deleting the user.', err)
+        return Boom.badImplementation('There was an error while deleting the user.')
+      }
+    })()
+  }
+
+  deleteE2ETestUser (request, h) {
+    return (async () => {
+      try {
+        const rowsDeleted = await deleteUserByEmail('e2e-test@coinaly.io')
+        if (rowsDeleted) {
+          return {
+            totalDeleted: rowsDeleted
+          }
+        } else {
+          return Boom.badRequest('Nothing to delete. User e2e test email does not exist.')
         }
       } catch (err) {
         console.log('Unknown error while deleting the user.', err)
