@@ -20,7 +20,8 @@ module.exports = [
       validate: {
         payload: {
           email: Joi.string().email({ minDomainAtoms: 2 }).required(),
-          password: Joi.string().required()
+          password: Joi.string().required(),
+          emailOptIn: Joi.boolean()
         }
       }
     }

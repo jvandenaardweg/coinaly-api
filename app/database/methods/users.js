@@ -3,15 +3,17 @@ const randomstring = require('randomstring')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 
-const createUser = async function (email, plainTextPassword) {
+const createUser = async function (email, plainTextPassword, emailOptIn) {
   const verificationCode = randomstring.generate().toUpperCase()
   const passwordHash = await bcrypt.hash(plainTextPassword, saltRounds)
   const createdUser = await knex('users')
-  .insert({
-    email: email,
-    password: passwordHash,
-    verification: verificationCode})
-    .returning(['id', 'email', 'verification', 'created_at', 'activated_at'])
+    .insert({
+      email: email,
+      password: passwordHash,
+      verification: verificationCode,
+      email_opt_in: emailOptIn
+    })
+    .returning(['id', 'email', 'verification', 'email_opt_in', 'created_at', 'activated_at'])
   return createdUser
 }
 
@@ -30,7 +32,7 @@ const verifyUser = async function (verificationCode) {
 const showUser = async function (userId) {
   const user = await knex('users')
   .where({id: userId})
-  .select('id', 'email', 'created_at', 'updated_at', 'activated_at', 'active_at')
+  .select('id', 'email', 'email_opt_in', 'created_at', 'updated_at', 'activated_at', 'active_at')
   return user
 }
 

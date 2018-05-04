@@ -10,10 +10,11 @@ class Users {
   create (request, h) {
     const email = request.payload.email
     const plainTextPassword = request.payload.password
+    const emailOptIn = request.payload.emailOptIn
 
     return (async () => {
       try {
-        const createdUser = await createUser(email, plainTextPassword)
+        const createdUser = await createUser(email, plainTextPassword, emailOptIn)
         await sendEmail('signup-verify', email, createdUser[0].verification)
 
         delete createdUser[0].verification

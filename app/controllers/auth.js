@@ -54,11 +54,11 @@ class Auth {
   }
 
   verify (request, h) {
-    const verificationCode = request.payload.verificationCode
+    const verification = request.payload.verification
 
     return (async () => {
       try {
-        const user = await verifyUser(verificationCode)
+        const user = await verifyUser(verification)
         if (user.length) {
           return {
             message: 'Success!',

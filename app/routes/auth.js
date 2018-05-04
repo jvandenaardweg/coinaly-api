@@ -34,7 +34,7 @@ module.exports = [
       auth: false,
       validate: {
         payload: {
-          verificationCode: Joi.string().required()
+          verification: Joi.string().required()
         }
       }
     }
