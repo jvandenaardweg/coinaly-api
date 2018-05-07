@@ -5,6 +5,7 @@ const Boom = require('boom')
 const encryption = require('../helpers/encryption')
 const ExchangeWorkers = require('../workers')
 const { getExchangeById } = require('../database/methods/exchanges')
+const { getAllKeysByUserId, createKey, deleteKey } = require('../database/methods/keys')
 class Keys {
 
   create (request, h) {
@@ -14,8 +15,6 @@ class Keys {
     const apiKeyEncoded = encryption.encryptString(plainTextApiKey, process.env.ENCODE_SECRET)
     const apiSecretEncoded = encryption.encryptString(plainTextApiSecret, process.env.ENCODE_SECRET)
     const userId = request.auth.credentials.id
-
-    // TODO: first check if key/secret pair can get the user his balance from the exchange
 
     return (async () => {
       try {
@@ -37,14 +36,10 @@ class Keys {
       }
 
       try {
-        await knex('keys').insert({
-          user_id: userId,
-          exchange_id: exchangeId,
-          api_key_encoded: apiKeyEncoded,
-          api_secret_encoded: apiSecretEncoded
-        })
+        const key = await createKey(userId, exchangeId, apiKeyEncoded, apiSecretEncoded)
         return {
-          message: 'API key and secret saved securely.'
+          message: 'API key and secret saved securely.',
+          key: key
         }
       } catch (err) {
         if (err.constraint === 'keys_user_id_exchange_id_unique') {
@@ -62,11 +57,8 @@ class Keys {
 
     return (async () => {
       try {
-        // VERY IMPORTANT: NEVER return the encoded API key and/or secret
-        const keys = await knex('keys').where({ user_id: userId}).select('exchange_id', 'created_at', 'updated_at')
-        return {
-          keys: keys
-        }
+        const keys = await getAllKeysByUserId(userId)
+        return keys
       } catch (err) {
         console.log('Unknown error while retrieving the API keys.', err)
         return Boom.badImplementation('There was an error while retrieving the API keys.')
@@ -80,11 +72,10 @@ class Keys {
 
     return (async () => {
       try {
-        // VERY IMPORTANT: NEVER return the encoded API key and/or secret
-        const deletedKeys = await knex('keys').where({ user_id: userId, exchange_id: exchangeId}).del()
-        if (deletedKeys) {
+        const totalDeleted = await deleteKey(userId, exchangeId)
+        if (totalDeleted) {
           return {
-            totalDeleted: deletedKeys
+            totalDeleted: totalDeleted
           }
         } else {
           return Boom.badRequest('Nothing to delete. API key and secret combination does not exist for this exchange ID.')
