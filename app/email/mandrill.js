@@ -14,7 +14,7 @@ function sendTemplate(opts) {
   })
 }
 
-const sendEmail = function (templateName, userEmail, verificationCode) {
+const sendEmail = function (templateName, userEmail, verificationToken) {
   const params = {
     template_name: templateName,
     template_content: [],
@@ -29,7 +29,7 @@ const sendEmail = function (templateName, userEmail, verificationCode) {
       global_merge_vars: [
         {
           name: 'verification_url',
-          content: `${baseUrl}/signup/verify/${verificationCode}`
+          content: `${baseUrl}/signup/verify/${verificationToken}`
         }
       ]
     }

@@ -13,7 +13,7 @@
     "start": "forever app/server.js",
     "docs": "apidoc -i ./app/controllers -o ./docs/",
     "test": "jest --coverage --forceExit",
-    "test:watch": "jest --watch --notify",
+    "test:watch": "jest --watch",
     "loadtest:binance:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/binance/balances?forceRefresh=true",
     "loadtest:bittrex:balances": "loadtest -n 100 -c 1 http://localhost:5000/exchanges/bittrex/balances?forceRefresh=true",
     "dev": "nodemon -L app/server.js",
@@ -41,6 +41,7 @@
     "collectCoverage": false
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.2.1",
     "apidoc": "^0.17.6",
     "bcrypt": "^2.0.1",
     "boom": "^7.2.0",

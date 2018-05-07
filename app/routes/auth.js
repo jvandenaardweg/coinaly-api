@@ -7,15 +7,26 @@ module.exports = [
     path: '/auth/login',
     handler: authController.login,
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        payload: {
+          email: Joi.string().email({ minDomainAtoms: 2 }).required(),
+          password: Joi.string().required()
+        }
+      }
     }
   },
   {
     method: 'POST',
-    path: '/auth/forgotpassword',
-    handler: authController.forgotPassword,
+    path: '/auth/reset',
+    handler: authController.reset,
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        payload: {
+          email: Joi.string().email({ minDomainAtoms: 2 }).required()
+        }
+      }
     }
   },
   {
@@ -34,7 +45,21 @@ module.exports = [
       auth: false,
       validate: {
         payload: {
-          verification: Joi.string().required()
+          verificationToken: Joi.string().required().regex(/^[a-zA-Z0-9]/)
+        }
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/auth/reset/password',
+    handler: authController.resetPassword,
+    options: {
+      auth: false,
+      validate: {
+        payload: {
+          password: Joi.string().required(),
+          resetToken: Joi.string().required().regex(/^[a-zA-Z0-9]/)
         }
       }
     }

@@ -3,7 +3,8 @@ const knex = require('../database/knex')
 const bcrypt = require('bcrypt')
 const Boom = require('boom')
 const JWT = require('jsonwebtoken')
-const { verifyUser, getUserCredentialsByEmail } = require('../database/methods/users')
+const { verifyUser, getUserCredentialsByEmail, resetUserByEmail, getUserByEmail, getUserByResetToken, setUserResetPassword, setUserActiveAt } = require('../database/methods/users')
+const { sendResetEmail } = require('../email/sendgrid')
 
 class Auth {
 
@@ -24,16 +25,18 @@ class Auth {
         return Boom.badImplementation('There was an error retrieving the user.')
       }
 
-      if (user.length) {
-        if (user[0].activated_at) {
-          const passwordIsCorrect = await bcrypt.compare(plaintextPassword, user[0].password)
+      if (user) {
+        if (user.activated_at) {
+          const passwordIsCorrect = await bcrypt.compare(plaintextPassword, user.password)
           if (passwordIsCorrect) {
 
             // Make sure we don't send any other sensitive data
             const cleanUser = {
-              id: user[0].id,
-              email: user[0].email
+              id: user.id,
+              email: user.email
             }
+
+            await setUserActiveAt(cleanUser.id)
 
             const token = JWT.sign(cleanUser, process.env.JWT_SECRET)
 
@@ -54,15 +57,15 @@ class Auth {
   }
 
   verify (request, h) {
-    const verification = request.payload.verification
+    const verificationToken = request.payload.verificationToken
 
     return (async () => {
       try {
-        const user = await verifyUser(verification)
-        if (user.length) {
+        const user = await verifyUser(verificationToken)
+        if (user) {
           return {
             message: 'Success!',
-            user: user[0]
+            user: user
           }
         } else {
           return Boom.badRequest('There is no account to activate with this verification code.')
@@ -75,10 +78,60 @@ class Auth {
 
   }
 
-  forgotPassword (request, h) {
-    return {
-      message: 'Password reset flow'
-    }
+  reset (request, h) {
+    const email = request.payload.email
+
+    return (async () => {
+      try {
+        const user = await getUserByEmail(email)
+        if (!user) {
+          return Boom.notFound('There is no account found with this e-mail address.')
+        }
+
+        // Reset the user, returning a new verification code
+        const resettedUser = await resetUserByEmail(user.email)
+
+        // Send the reset email through Sendgrid
+        await sendResetEmail(resettedUser.email, resettedUser.reset_token)
+
+        delete resettedUser.reset_token
+
+        return {
+          message: `Success! An e-mail has been send to ${resettedUser.email}.`,
+          user: resettedUser
+        }
+      } catch (e) {
+        console.log(e)
+        return Boom.badImplementation('There was an error retrieving the user.')
+      }
+    })()
+
+  }
+
+  // GET: /auth/reset/password
+  // Resets the password for the user with the given verification code
+  resetPassword (request, h) {
+    const password = request.payload.password
+    const resetToken = request.payload.resetToken
+
+    return (async () => {
+      try {
+        const user = await getUserByResetToken(resetToken)
+        if (user) {
+          const resettedUser = await setUserResetPassword(password, resetToken)
+          return {
+            message: 'Success! Resetted the password',
+            user: resettedUser
+          }
+        } else {
+          return Boom.notFound('There is no account found with this verification code.')
+        }
+      } catch (err) {
+        console.log(err)
+        return Boom.badImplementation('There was an error retrieving the user.')
+      }
+    })()
+
   }
 
   logout (request, h) {

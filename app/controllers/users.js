@@ -15,13 +15,13 @@ class Users {
     return (async () => {
       try {
         const createdUser = await createUser(email, plainTextPassword, emailOptIn)
-        await sendEmail('signup-verify', email, createdUser[0].verification)
+        await sendEmail('signup-verify', email, createdUser.verification_token)
 
-        delete createdUser[0].verification
+        delete createdUser.verification_token
 
         return {
           message: 'User created.',
-          user: createdUser[0]
+          user: createdUser
         }
       } catch (err) {
         if (err.constraint === 'users_email_unique') {
@@ -42,7 +42,7 @@ class Users {
         const user = await showUser(userId)
         if (user.length) {
           return {
-            ...user[0]
+            ...user
           }
         } else {
           return Boom.notFound('User not found.')
