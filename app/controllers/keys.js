@@ -3,7 +3,10 @@ const bcrypt = require('bcrypt')
 const util = require('util')
 const Boom = require('boom')
 const encryption = require('../helpers/encryption')
+const ExchangeWorkers = require('../workers')
+const { getExchangeById } = require('../database/methods/exchanges')
 class Keys {
+
   create (request, h) {
     const exchangeId = request.payload.exchangeId
     const plainTextApiKey = request.payload.apiKey
@@ -12,7 +15,27 @@ class Keys {
     const apiSecretEncoded = encryption.encryptString(plainTextApiSecret, process.env.ENCODE_SECRET)
     const userId = request.auth.credentials.id
 
+    // TODO: first check if key/secret pair can get the user his balance from the exchange
+
     return (async () => {
+      try {
+
+        const exchange = await getExchangeById(exchangeId)
+
+        if (exchange) {
+          // Set key and secret for current user
+          ExchangeWorkers[exchange.slug].setApiCredentials(plainTextApiKey, plainTextApiSecret)
+
+          // Just do a call, if all goes well, the key/secret pair is valid
+          // If it returns an error, an exception will be thrown
+          await ExchangeWorkers[exchange.slug].fetchBalance(true, userId)
+        } else {
+          return Boom.badRequest('The exchange does not exist.')
+        }
+      } catch (err) {
+        return Boom.badRequest('The API key and secret does not seem to be correct. We tried to get your balance from the exchange, but it failed. Please try an other API key or secret.')
+      }
+
       try {
         await knex('keys').insert({
           user_id: userId,

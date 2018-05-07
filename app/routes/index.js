@@ -4,6 +4,7 @@ module.exports = [
   ...require('./balances'),
   ...require('./currencies'),
   ...require('./deposits'),
+  ...require('./exchanges'),
   ...require('./keys'),
   ...require('./markets'),
   ...require('./orders'),
