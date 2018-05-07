@@ -124,7 +124,7 @@ class Auth {
             user: resettedUser
           }
         } else {
-          return Boom.notFound('There is no account found with this verification code.')
+          return Boom.notFound('There is no account found to reset.')
         }
       } catch (err) {
         console.log(err)

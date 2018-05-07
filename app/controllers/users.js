@@ -83,7 +83,7 @@ class Users {
   deleteE2ETestUser (request, h) {
     return (async () => {
       try {
-        const rowsDeleted = await deleteUserByEmail('e2e-test@coinaly.io')
+        const rowsDeleted = await deleteUserByEmail('e2e-signup@coinaly.io')
         if (rowsDeleted) {
           return {
             totalDeleted: rowsDeleted
