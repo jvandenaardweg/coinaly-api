@@ -35,7 +35,7 @@ const verifyUser = function (verificationToken) {
 const showUser = function (userId) {
   return knex('users')
   .where({id: userId})
-  .select('id', 'email', 'email_opt_in', 'created_at', 'updated_at', 'activated_at', 'active_at')
+  .select('id', 'email', 'email_opt_in', 'activated_at', 'reset_at', 'active_at', 'created_at', 'updated_at', 'onboarded')
   .get(0)
 }
 

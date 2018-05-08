@@ -40,7 +40,7 @@ class Users {
     return (async () => {
       try {
         const user = await showUser(userId)
-        if (user.length) {
+        if (user) {
           return {
             ...user
           }
