@@ -67,6 +67,7 @@
     "knex": "^0.14.6",
     "mandrill-api": "^1.0.45",
     "newrelic": "^3.3.1",
+    "node-fetch": "^2.1.2",
     "nodemon": "^1.14.3",
     "ololog": "^1.1.94",
     "pg": "^7.4.1",

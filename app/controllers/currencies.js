@@ -2,6 +2,7 @@ const Boom = require('boom')
 const transformers = require('../helpers/transformers')
 const { convertObjectToKeyString, convertKeyStringToObject } = require('../helpers/objects')
 const redis = require('../cache/redis')
+const fetch = require('node-fetch')
 class Currencies {
   constructor () { }
 
