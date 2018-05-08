@@ -29,5 +29,14 @@ module.exports = [
       auth: 'jwt',
       validate: routeValidations
     }
+  },
+  {
+    method: 'GET',
+    path: '/exchanges/{exchange}/orders/closed',
+    handler: ordersController.indexClosed,
+    options: {
+      auth: 'jwt',
+      validate: routeValidations
+    }
   }
 ]

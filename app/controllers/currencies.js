@@ -18,6 +18,11 @@ class Currencies {
           const result = await fetch('https://api.coinmarketcap.com/v1/ticker/?limit=0').then(response => response.json())
           // const transformedResult = transformers.transformObjectsCryptocompare(result.Data)
           const transformedResult = transformers.transformObjectsCoinmarketcap(result)
+
+          // Some exchanges use "IOTA" for what is actually "MIOTA" (Binance for example)
+          // So we just overwrite "IOTA" with the "MIOTA" object
+          transformedResult['IOTA'] = transformedResult['MIOTA']
+
           const resultStringHMSET = convertObjectToKeyString(transformedResult)
           redis.hmset('currencies', resultStringHMSET)
           redis.expire('currencies', 3600 * 24) // 24 uur

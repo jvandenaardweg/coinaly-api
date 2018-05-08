@@ -1,28 +1,39 @@
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
 const { getPublicApiKeySecret } = require('../helpers/api-keys')
+const { getDecodedExchangeApiCredentials } = require('../database/methods/keys')
 class Orders {
   constructor () {
     // console.log('Controllers (orders):', 'Intance created.')
   }
 
   index (request, h) {
-    const userId = 1 // TODO: get from user session
+    const userId = request.auth.credentials.id
+    const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
-    // TODO: use database to get keys, not use the public keys here
-    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
-
-    // Set key and secret for current user
-    ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
-
     return (async () => {
       try {
-        const result = await ExchangeWorkers[exchangeSlug].fetchOrders(forceRefresh, userId)
-        return result
-      } catch (error) {
-        return Boom.badImplementation(error)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
+
+        try {
+          ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+          try {
+            const result = await ExchangeWorkers[exchangeSlug].fetchOrders(forceRefresh, userId)
+            return result
+          } catch (error) {
+            return Boom.badImplementation(error)
+          }
+
+        } catch (err) {
+          return Boom.badImplementation('Failed to set the API credentials in the exchange worker.')
+        }
+
+      } catch (err) {
+        console.log(err)
+        return Boom.badImplementation('Failed to retrieve the exchange API credentials from our database.')
       }
     })()
   }
@@ -40,9 +51,36 @@ class Orders {
   }
 
   indexClosed (request, h) {
-    return {
-      message: 'should return all closed orders'
-    }
+    const userId = request.auth.credentials.id
+    const exchangeId = 1 // TODO: make dynamic
+    const forceRefresh = request.query.forceRefresh
+    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+
+    return (async () => {
+      try {
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
+
+        try {
+          ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+          try {
+            const result = await ExchangeWorkers[exchangeSlug].fetchClosedOrders(forceRefresh, userId)
+            return result
+          } catch (err) {
+            console.log(err)
+            return Boom.badImplementation('Failed to fetch the closed orders from the exchange.')
+          }
+
+        } catch (err) {
+          console.log(err)
+          return Boom.badImplementation('Failed to set the API credentials in the exchange worker.')
+        }
+
+      } catch (err) {
+        console.log(err)
+        return Boom.badImplementation('Failed to retrieve the exchange API credentials from our database.')
+      }
+    })()
   }
 
   show (request, h) {

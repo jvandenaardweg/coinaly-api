@@ -249,6 +249,35 @@ class ExchangeWorker {
     }
   }
 
+  // Private (needs userId)
+  async fetchClosedOrders (forceRefresh, userId) {
+    console.log('Exchange Worker (private method):', 'Fetch Closed Orders', `/ User ID: ${userId}`)
+
+    const cacheKey = `private:exchanges:orders:closed:${this.exchangeSlug}:${userId}`
+
+    try {
+      let result
+
+      if (forceRefresh) {
+        await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
+      }
+
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        // TODO: Binance requires a list of symbols to fetch the orders
+        result = await this.ccxt.fetchClosedOrders()
+        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result))
+      }
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
   async getCache (key) {
     console.log(`Exchange Worker (redis):`, 'Get Cache', key)
     const result = await this.redis.hget(key, 'all')
