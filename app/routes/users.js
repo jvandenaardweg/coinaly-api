@@ -20,7 +20,14 @@ module.exports = [
       validate: {
         payload: {
           email: Joi.string().email({ minDomainAtoms: 2 }).required().valid(
-            'info@coinaly.io', 'jordyvandenaardweg@gmail.com', 'e2e-test@coinaly.io', 'test@coinaly.io', 'e2e-signup@coinaly.io', 'e2e-login@coinaly.io'),
+            'info@coinaly.io',
+            'jordyvandenaardweg@gmail.com',
+            'e2e-test@coinaly.io',
+            'test@coinaly.io',
+            'e2e-signup@coinaly.io',
+            'e2e-login@coinaly.io',
+            'does-not-exist@coinaly.io'
+          ),
           password: Joi.string().required(),
           emailOptIn: Joi.boolean()
         }
