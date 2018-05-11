@@ -68,6 +68,7 @@ class Users {
         const rowsDeleted = await deleteUser(userId)
         if (rowsDeleted) {
           return {
+            message: 'Succesfully deleted your account.',
             totalDeleted: rowsDeleted
           }
         } else {
@@ -86,6 +87,7 @@ class Users {
         const rowsDeleted = await deleteUserByEmail('e2e-signup@coinaly.io')
         if (rowsDeleted) {
           return {
+            message: 'Succesfully deleted the e2e test account.',
             totalDeleted: rowsDeleted
           }
         } else {

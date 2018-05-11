@@ -1,7 +1,7 @@
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
-const { getPublicApiKeySecret } = require('../helpers/api-keys')
 const { getDecodedExchangeApiCredentials } = require('../database/methods/keys')
+const { getExchangeBySlug } = require('../database/methods/exchanges')
 class Orders {
   constructor () {
     // console.log('Controllers (orders):', 'Intance created.')
@@ -9,13 +9,13 @@ class Orders {
 
   index (request, h) {
     const userId = request.auth.credentials.id
-    const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
 
     return (async () => {
       try {
-        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
+        const exchange = await getExchangeBySlug(exchangeSlug) // TODO: change slug to use just the ID in the request.params?
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
           ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)

@@ -1,6 +1,5 @@
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
-const { getPublicApiKeySecret } = require('../helpers/api-keys')
 
 class Tickers {
   constructor () {
@@ -11,13 +10,10 @@ class Tickers {
     const forceRefresh = request.query.forceRefresh
     const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
     const symbol = request.query.symbol
-    const apiCredentials = getPublicApiKeySecret(exchangeSlug)
 
     return (async () => {
       try {
         let result
-
-        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
 
         if (symbol) {
           result = await ExchangeWorkers[exchangeSlug].fetchTicker(symbol, forceRefresh) // Cached for 5 seconds

@@ -1,7 +1,7 @@
-// let PrivateExchangeWorker = require('../workers/private')
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
-const { getPublicApiKeySecret } = require('../helpers/api-keys')
+const { getDecodedExchangeApiCredentials } = require('../database/methods/keys')
+const { getExchangeBySlug } = require('../database/methods/exchanges')
 
 class Balances {
   constructor () {
@@ -23,12 +23,11 @@ class Balances {
 
     return (async () => {
       try {
-
-        // TODO: use database to get keys, not use the public keys here
-        const apiCredentials = getPublicApiKeySecret(exchangeSlug)
+        const exchange = await getExchangeBySlug(exchangeSlug) // TODO: change slug to use just the ID in the request.params?
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].setApiCredentials(apiCredentials.apiKey, apiCredentials.apiSecret)
+        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
         const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
         return result

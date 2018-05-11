@@ -27,6 +27,21 @@ module.exports = [
     }
   },
   {
+    method: 'PATCH',
+    path: '/keys',
+    handler: keysController.update,
+    options: {
+      auth: 'jwt',
+      validate: {
+        payload: {
+          apiKey: Joi.string().required(),
+          apiSecret: Joi.string().required(),
+          exchangeId: Joi.number().required()
+        }
+      }
+    }
+  },
+  {
     method: 'DELETE',
     path: '/keys/{exchangeId}',
     handler: keysController.delete,
