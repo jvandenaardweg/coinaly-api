@@ -4,7 +4,6 @@ require('dotenv').config({ path: '../.env' })
 
 // Error reporting monitoring
 if (process.env.NODE_ENV === 'production') {
-
   const Raven = require('raven')
   Raven.config('https://aebac961b26f4b61ad5c88c7f91ee1fc:096956741e2d42c9905fba5f73f18971@sentry.io/1098123').install();
 }

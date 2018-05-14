@@ -4,6 +4,7 @@ const redis = require('../cache/redis')
 const { getAllSymbols } = require('../database/methods/symbols')
 
 function setCache (symbols) {
+  console.log(symbols)
   const resultStringHMSET = convertObjectToKeyString(symbols)
   redis.hmset('symbols', resultStringHMSET)
   // redis.expire('symbols', 3600 * 24) // 24 uur
