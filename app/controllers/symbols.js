@@ -1,10 +1,9 @@
 const Boom = require('boom')
 const { convertObjectToKeyString, convertKeyStringToObject } = require('../helpers/objects')
 const redis = require('../cache/redis')
-const { getAllSymbols } = require('../database/methods/symbols')
+const { getAllSymbols, insertNewSymbols } = require('../database/methods/symbols')
 
 function setCache (symbols) {
-  console.log(symbols)
   const resultStringHMSET = convertObjectToKeyString(symbols)
   redis.hmset('symbols', resultStringHMSET)
   // redis.expire('symbols', 3600 * 24) // 24 uur
@@ -36,6 +35,7 @@ class Symbols {
   fetch (request, h) {
     return (async () => {
       try {
+        await insertNewSymbols()
         const result = await getAllSymbols()
         setCache(result)
         return result

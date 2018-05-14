@@ -5,9 +5,7 @@ const fetch = require('node-fetch')
 async function getSymbols () {
   try {
     const result = await fetch('https://min-api.cryptocompare.com/data/all/coinlist').then(response => response.json())
-    console.log('getSymbols', result)
     const symbolsArray = transformers.transformObjectsCryptocompareToArray(result.Data)
-    console.log('transformObjectsCryptocompareToArray', symbolsArray)
     return symbolsArray
   } catch (err) {
     console.log('Error getting symbols from external source')
@@ -29,10 +27,10 @@ const insertNewSymbols = async function () {
 
   if (missingSymbolsArray.length) {
     await knex('symbols').insert(missingSymbolsArray)
-    console.log('insertNewSymbols', `${missingSymbolsArray.length} missing symbols added!`)
+    console.log('insertNewSymbols', `${missingSymbolsArray.length} missing symbols added! All good!`)
     return false
   } else {
-    console.log('insertNewSymbols', 'No missing symbols added.')
+    console.log('insertNewSymbols', 'No missing symbols found, so we added none. All good!')
     return true
   }
 
