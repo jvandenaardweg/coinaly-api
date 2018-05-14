@@ -3,9 +3,10 @@ const { convertObjectToKeyString, convertKeyStringToObject } = require('../helpe
 const redis = require('../cache/redis')
 const { getAllSymbols, insertNewSymbols } = require('../database/methods/symbols')
 
-function setCache (symbols) {
+async function setCache (symbols) {
   const resultStringHMSET = convertObjectToKeyString(symbols)
-  redis.hmset('symbols', resultStringHMSET)
+  await redis.del('symbols') // Empty, the cache first, so when we add new keys, it's always in sync with our database
+  await redis.hmset('symbols', resultStringHMSET)
   // redis.expire('symbols', 3600 * 24) // 24 uur
 }
 
@@ -37,7 +38,7 @@ class Symbols {
       try {
         await insertNewSymbols()
         const result = await getAllSymbols()
-        setCache(result)
+        await setCache(result)
         return result
       } catch (error) {
         return Boom.badImplementation(error)
