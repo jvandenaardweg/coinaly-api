@@ -4,13 +4,15 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.createTable('prices', function (table) {
-    table.string('symbol').primary().unique() // BTC
+    table.string('symbol_id', 10).primary().unique() // BTC
     table.float('USD').notNullable() // 8387.96
     table.float('EUR').notNullable() // 7027.04
     table.float('GBP').notNullable() // 6228.6
     table.float('JPY').notNullable() // 953966.5
     table.float('KRW').notNullable() // 9465052.81
     table.timestamps(false, true)
+
+    table.foreign('symbol_id').references('id').inTable('symbols').onDelete('CASCADE')
   })
 }
 

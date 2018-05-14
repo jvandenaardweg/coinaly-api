@@ -3,35 +3,46 @@
 const Boom = require('boom')
 const { convertObjectToKeyString, convertKeyStringToObject } = require('../helpers/objects')
 const redis = require('../cache/redis')
-const fetch = require('node-fetch')
+const { getAllPrices, insertNewPrices } = require('../database/methods/prices')
+
+async function setCache (result) {
+  const resultStringHMSET = convertObjectToKeyString(result)
+  await redis.del('prices') // Empty, the cache first, so when we add new keys, it's always in sync with our database
+  await redis.hmset('prices', resultStringHMSET)
+}
 
 class Prices {
   constructor () { }
 
   index (request, h) {
-    // const symbols = request.query.symbols
-    const symbols = 'BTC,ETH,USDT,BNB,USD,EUR'
-    const pricesCacheKey = 'prices'
-
     return (async () => {
       try {
-        const cachedPrices = await redis.hgetall(pricesCacheKey)
-
+        const cachedPrices = await redis.hgetall('prices')
         if (Object.keys(cachedPrices).length) {
           return convertKeyStringToObject(cachedPrices)
         } else {
-          const result = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=USD,EUR`)
-          .then(response => response.json())
-
-          const resultStringHMSET = convertObjectToKeyString(result)
-          redis.hmset(pricesCacheKey, resultStringHMSET)
-          redis.expire(pricesCacheKey, 60) // 1 minute
-          return result
+          return {
+            message: 'Prices cache is empty. First run prices/fetch.'
+          }
         }
       } catch (error) {
         return Boom.badImplementation(error)
       }
     })()
   }
+
+  fetch (request, h) {
+    return (async () => {
+      try {
+        const prices = await insertNewPrices()
+        const result = await getAllPrices()
+        await setCache(result)
+        return result
+      } catch (error) {
+        return Boom.badImplementation(error)
+      }
+    })()
+  }
 }
+
 module.exports = new Prices()

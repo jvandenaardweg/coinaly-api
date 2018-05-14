@@ -14,5 +14,13 @@ module.exports = [
         }
       }
     }
+  },
+  {
+    method: 'GET',
+    path: '/prices/fetch',
+    handler: pricesController.fetch,
+    options: {
+      auth: false
+    }
   }
 ]

@@ -24,7 +24,8 @@
     "migrate:rollback": "knex migrate:rollback --knexfile app/knexfile.js",
     "seed:run": "knex seed:run --knexfile app/knexfile.js",
     "heroku-postbuild": "npm run migrate:latest",
-    "scheduled:update-symbols": "node scheduled-update-symbols.js"
+    "scheduled:update-symbols": "node scheduled-update-symbols.js",
+    "scheduled:update-prices": "node scheduled-update-prices.js"
   },
   "jest": {
     "moduleFileExtensions": [

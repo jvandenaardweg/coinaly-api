@@ -18,7 +18,7 @@ const insertNewSymbols = async function () {
   let missingSymbolsArray = []
   const externalSymbols = await getSymbols()
   const allStoredSymbols = await knex.select().from('symbols')
-  const symbolList = allStoredSymbols.map(symbol => symbol.id, {}) // So we have an array of missing symbol IDs: ['BTC', 'ETH', 'USDT'] etc...
+  const symbolList = allStoredSymbols.map(symbol => symbol.id, {}) // So we have an array of symbol IDs: ['BTC', 'ETH', 'USDT'] etc...
 
   // Now find missing symbols
   missingSymbolsArray = externalSymbols.filter(symbol => {
