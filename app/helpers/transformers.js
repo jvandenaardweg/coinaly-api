@@ -1,5 +1,34 @@
 const icons = require('../../node_modules/cryptocurrency-icons/manifest.json').icons
 
+function transformObjectsCryptocompareToArray (objects) {
+  return Object.keys(objects).reduce((obj, key) => {
+    const symbolLower = objects[key].Symbol.toLowerCase()
+    const icon = icons.includes(symbolLower)
+    const hasIcon = (icon) ? true : false
+    const iconLocation = (hasIcon) ? `/static/icons/cryptocurrencies/svg/color/${symbolLower}.svg` : `/static/icons/cryptocurrencies/svg/black/generic.svg`
+
+    const newObject = {
+      id: objects[key].Symbol,
+      name: objects[key].CoinName,
+      active: objects[key].IsTrading,
+      icon_uri: iconLocation
+    }
+
+    obj.push(newObject)
+
+    // Some exchanges use "IOTA" for what is actually "MIOTA" (Binance for example)
+    // So we just overwrite "IOTA" with the "MIOTA" object
+    if (newObject.id === 'IOT') {
+      const iotaObject = Object.assign({}, newObject)
+      iotaObject.id = 'IOTA'
+      iotaObject.name = 'MIOTA'
+      obj.push(iotaObject)
+    }
+
+    return obj
+  }, [])
+}
+
 function transformObjectsCryptocompare (objects) {
   /*
     "BTC": {
@@ -83,6 +112,7 @@ function transformObjectsCoinmarketcap (objects) {
 }
 
 module.exports = {
+  transformObjectsCryptocompareToArray,
   transformObjectsCryptocompare,
   transformObjectsCoinmarketcap
 }

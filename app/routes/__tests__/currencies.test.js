@@ -1,12 +1,12 @@
-const currencies = require('../currencies')
+const symbols = require('../symbols')
 
-describe('routes/currencies.js', () => {
+describe('routes/symbols.js', () => {
   it('should return an object', () => {
-    expect(typeof currencies).toBe('object')
+    expect(typeof symbols).toBe('object')
   })
 
   it('each route should have an method, path, handler and options property', () => {
-    currencies.forEach(route => {
+    symbols.forEach(route => {
       expect(route).toHaveProperty('method')
       expect(route).toHaveProperty('path')
       expect(route).toHaveProperty('handler')

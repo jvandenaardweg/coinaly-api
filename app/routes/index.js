@@ -2,7 +2,7 @@
 module.exports = [
   ...require('./auth'),
   ...require('./balances'),
-  ...require('./currencies'),
+  ...require('./symbols'),
   ...require('./deposits'),
   ...require('./exchanges'),
   ...require('./keys'),
