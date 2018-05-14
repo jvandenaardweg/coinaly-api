@@ -5,7 +5,9 @@ const fetch = require('node-fetch')
 async function getSymbols () {
   try {
     const result = await fetch('https://min-api.cryptocompare.com/data/all/coinlist').then(response => response.json())
+    console.log('getSymbols', result)
     const symbolsArray = transformers.transformObjectsCryptocompareToArray(result.Data)
+    console.log('transformObjectsCryptocompareToArray', symbolsArray)
     return symbolsArray
   } catch (err) {
     console.log('Error getting symbols from external source')
