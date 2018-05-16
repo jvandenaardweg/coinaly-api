@@ -22,6 +22,15 @@ class ExchangeWorker {
     }
   }
 
+  removeApiCredentials () {
+    if (this.ccxt) {
+      this.ccxt.apiKey = null
+      this.ccxt.secret = null
+    } else {
+      throw new Error('CCXT is not created in this instance, so we cannot remove the API credentials.')
+    }
+  }
+
   // Creates a CCXT instance, without API credentials
   createCCXTInstance () {
     try {
@@ -274,6 +283,35 @@ class ExchangeWorker {
       }
       return result
     } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private
+  // Tickers are cached for 5 seconds
+  async fetchDepositAddress (symbolId, userId, forceRefresh) {
+    console.log(`Exchange Worker (public method):`, 'Fetch Deposit Address')
+
+    const cacheKey = `private:deposits:addresses:${userId}`
+
+    try {
+      let result
+
+      if (forceRefresh) {
+        await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
+      }
+
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        result = await this.ccxt.fetchDepositAddress(symbolId)
+        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result), 86400) // 24 hours
+      }
+      return result
+    }  catch (error) {
       return this.handleCCXTInstanceError(error)
     }
   }
