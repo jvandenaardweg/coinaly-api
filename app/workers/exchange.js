@@ -288,28 +288,12 @@ class ExchangeWorker {
   }
 
   // Private
-  // Tickers are cached for 5 seconds
+  // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
   async fetchDepositAddress (symbolId, userId, forceRefresh) {
     console.log(`Exchange Worker (public method):`, 'Fetch Deposit Address')
 
-    const cacheKey = `private:deposits:addresses:${userId}`
-
     try {
-      let result
-
-      if (forceRefresh) {
-        await this.deleteCache(cacheKey)
-      } else {
-        result = await this.getCache(cacheKey)
-      }
-
-      if (result) {
-        result = JSON.parse(result)
-      } else {
-        result = await this.ccxt.fetchDepositAddress(symbolId)
-        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
-        this.setCache(cacheKey, JSON.stringify(result), 86400) // 24 hours
-      }
+      const result = await this.ccxt.fetchDepositAddress(symbolId)
       return result
     }  catch (error) {
       return this.handleCCXTInstanceError(error)
