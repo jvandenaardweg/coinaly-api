@@ -104,6 +104,7 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
+        this.removeApiCredentials()
         result = await this.ccxt.fetchMarkets()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
@@ -133,6 +134,7 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
+        this.removeApiCredentials()
         result = await this.ccxt.loadMarkets()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
@@ -162,6 +164,7 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
+        this.removeApiCredentials()
         result = await this.ccxt.fetchTickers()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
@@ -191,9 +194,39 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
+        this.removeApiCredentials()
         result = await this.ccxt.fetchTicker(symbol)
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
+      }
+      return result
+    }  catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Public method
+  async fetchOHLCV (marketSymbol, interval = '1m', forceRefresh) {
+    console.log(`Exchange Worker (public method):`, 'Fetch OHLCV')
+
+    const cacheKey = `public:exchanges:ohlcv:${this.exchangeSlug}:${marketSymbol}:${interval}`
+
+    try {
+      let result
+
+      if (forceRefresh) {
+        await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
+      }
+
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        this.removeApiCredentials()
+        result = await this.ccxt.fetchOHLCV(marketSymbol, interval)
+        // if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result), 1800) // 30 minutes
       }
       return result
     }  catch (error) {
@@ -290,7 +323,7 @@ class ExchangeWorker {
   // Private
   // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
   async fetchDepositAddress (symbolId, userId, forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Fetch Deposit Address')
+    console.log(`Exchange Worker (private method):`, 'Fetch Deposit Address')
 
     try {
       const result = await this.ccxt.fetchDepositAddress(symbolId)

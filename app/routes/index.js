@@ -7,6 +7,7 @@ module.exports = [
   ...require('./exchanges'),
   ...require('./keys'),
   ...require('./markets'),
+  ...require('./ohlcv'),
   ...require('./orders'),
   ...require('./prices'),
   ...require('./tickers'),
