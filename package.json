@@ -47,8 +47,7 @@
     "apidoc": "^0.17.6",
     "bcrypt": "^2.0.1",
     "boom": "^7.2.0",
-    "ccxt": "^1.13.142",
-    "compression": "^1.7.2",
+    "ccxt": "^1.14.10",
     "crypto-js": "^3.1.9-1",
     "cryptocurrency-icons": "git+https://github.com/cjdowner/cryptocurrency-icons.git",
     "dotenv": "^5.0.1",
@@ -63,12 +62,12 @@
     "joi": "^13.3.0",
     "jsonwebtoken": "^8.2.1",
     "knex": "^0.14.6",
-    "newrelic": "^3.3.1",
+    "newrelic": "^4.1.1",
     "node-fetch": "^2.1.2",
     "nodemon": "^1.17.4",
     "pg": "^7.4.3",
     "randomstring": "^1.1.5",
-    "raven": "^2.6.1"
+    "raven": "^2.6.2"
   },
   "browserslist": [
     "> 1%",
