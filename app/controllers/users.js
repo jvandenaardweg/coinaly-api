@@ -2,9 +2,9 @@ const knex = require('../database/knex')
 const bcrypt = require('bcrypt')
 const util = require('util')
 const Boom = require('boom')
-const { sendEmail } = require('../email/mandrill')
 const randomstring = require('randomstring')
 const { createUser, showUser, deleteUser, deleteUserByEmail } = require('../database/methods/users')
+const { sendVerificationEmail } = require('../email/sendgrid')
 
 class Users {
   create (request, h) {
@@ -15,7 +15,9 @@ class Users {
     return (async () => {
       try {
         const createdUser = await createUser(email, plainTextPassword, emailOptIn)
-        await sendEmail('signup-verify', email, createdUser.verification_token)
+
+        // Send the reset email through Sendgrid
+        await sendVerificationEmail(createdUser.email, createdUser.verification_token)
 
         delete createdUser.verification_token
 
