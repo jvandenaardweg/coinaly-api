@@ -253,6 +253,7 @@ class ExchangeWorker {
         result = JSON.parse(result)
       } else {
         result = await this.ccxt.fetchBalance()
+        this.removeApiCredentials()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -282,6 +283,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         result = await this.ccxt.fetchOrders()
+        this.removeApiCredentials()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -311,6 +313,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         result = await this.ccxt.fetchClosedOrders()
+        this.removeApiCredentials()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -327,6 +330,7 @@ class ExchangeWorker {
 
     try {
       const result = await this.ccxt.fetchDepositAddress(symbolId)
+      this.removeApiCredentials()
       return result
     }  catch (error) {
       return this.handleCCXTInstanceError(error)
