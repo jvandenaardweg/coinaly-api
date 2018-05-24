@@ -1,9 +1,26 @@
 const ExchangeWorkers = require('../workers')
 const Boom = require('boom')
-
+const redis = require('../cache/redis')
+const { convertKeyStringToObject } = require('../helpers/objects')
 class Tickers {
   constructor () {
     // console.log('Controllers (tickers):', 'Intance created.')
+  }
+
+  index (request, h) {
+    const forceRefresh = request.query.forceRefresh
+    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+
+    return (async () => {
+      try {
+        // The exchanges cache is filled by out websocket
+        const result = await redis.hgetall(`exchanges:${exchangeSlug}:tickers`)
+        const resultJSON = convertKeyStringToObject(result)
+        return resultJSON
+      } catch (error) {
+        return Boom.badImplementation(error)
+      }
+    })()
   }
 
   show (request, h) {
