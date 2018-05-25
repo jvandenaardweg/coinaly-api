@@ -2,73 +2,9 @@ const transformers = require('../transformers')
 
 describe('helpers/transformers', () => {
   it('returns transformed Cryptocompare objects', () => {
-    expect(transformers.transformObjectsCryptocompare(mockCryptocompare)).toMatchObject(expectedCryptocompare)
-  })
-
-  it('returns transformed Cryptocompare objects', () => {
-    expect(transformers.transformObjectsCoinmarketcap(mockCoinmarketcap)).toMatchObject(expectedCoinmarketcap)
+    expect(transformers.transformObjectsCryptocompareToArray(mockCryptocompare)).toMatchObject(expectedCryptocompare)
   })
 })
-
-const mockCoinmarketcap = [
-  {
-    "id": "bitcoin",
-    "name": "Bitcoin",
-    "symbol": "BTC",
-    "rank": "1",
-    "price_usd": "9342.12",
-    "price_btc": "1.0",
-    "24h_volume_usd": "8700580000.0",
-    "market_cap_usd": "158784510345",
-    "available_supply": "16996625.0",
-    "total_supply": "16996625.0",
-    "max_supply": "21000000.0",
-    "percent_change_1h": "0.1",
-    "percent_change_24h": "4.68",
-    "percent_change_7d": "15.42",
-    "last_updated": "1524578077"
-  },
-  {
-    "id": "ethereum",
-    "name": "Ethereum",
-    "symbol": "ETH",
-    "rank": "2",
-    "price_usd": "699.639",
-    "price_btc": "0.0749236",
-    "24h_volume_usd": "3094680000.0",
-    "market_cap_usd": "69277484789.0",
-    "available_supply": "99018901.0",
-    "total_supply": "99018901.0",
-    "max_supply": null,
-    "percent_change_1h": "0.25",
-    "percent_change_24h": "8.61",
-    "percent_change_7d": "36.09",
-    "last_updated": "1524578062"
-  }
-]
-
-const expectedCoinmarketcap = {
-  "BTC": {
-    "availableSupply": 16996625,
-    "maxSupply": 21000000,
-    "name": "Bitcoin",
-    "symbol": "BTC",
-    "totalSupply": 16996625,
-    "rank": 1,
-    "hasIcon": true,
-    "iconLocation": "/static/icons/cryptocurrencies/svg/color/btc.svg"
-   },
-   "ETH": {
-    "availableSupply": 99018901,
-    "maxSupply": null,
-    "name": "Ethereum",
-    "symbol": "ETH",
-    "totalSupply": 99018901,
-    "rank": 2,
-    "hasIcon": true,
-    "iconLocation": "/static/icons/cryptocurrencies/svg/color/eth.svg"
-   }
-}
 
 const mockCryptocompare = {
   "BTC": {
@@ -106,22 +42,47 @@ const mockCryptocompare = {
     "SortOrder": "2",
     "Sponsored": false,
     "IsTrading": true
+  },
+  "UNKNOWNNN": {
+    "Id": "7605",
+    "Url": "/coins/unknownnn/overview",
+    "ImageUrl": "/media/20646/unknownnn_logo.png",
+    "Name": "UNKNOWNNN",
+    "Symbol": "UNKNOWNNN",
+    "CoinName": "Unknownnn",
+    "FullName": "Unknownnn (UNKNOWNNN)",
+    "Algorithm": null,
+    "ProofType": "PoW",
+    "FullyPremined": "0",
+    "TotalCoinSupply": "0",
+    "PreMinedValue": "N/A",
+    "TotalCoinsFreeFloat": "N/A",
+    "SortOrder": "0",
+    "Sponsored": false,
+    "IsTrading": false
   }
 }
 
-const expectedCryptocompare = {
-  "BTC": {
-    "symbol": "BTC",
+const expectedCryptocompare = [
+  {
+    "id": "BTC",
     "name": "Bitcoin",
-    "fullName": "Bitcoin (BTC)",
-    "totalSupply": 21000000,
-    "isTrading": true
+    "active": true,
+    "icon_uri": "/static/icons/cryptocurrencies/svg/color/btc.svg",
+    "color": "#F7931A"
   },
-  "ETH": {
-    "symbol": "ETH",
+  {
+    "id": "ETH",
     "name": "Ethereum",
-    "fullName": "Ethereum (ETH)",
-    "isTrading": true,
-    "totalSupply": 0
+    "active": true,
+    "icon_uri": "/static/icons/cryptocurrencies/svg/color/eth.svg",
+    "color": "#627EEA"
+  },
+  {
+    "id": "UNKNOWNNN",
+    "name": "Unknownnn",
+    "active": false,
+    "icon_uri": "/static/icons/cryptocurrencies/svg/black/generic.svg",
+    "color": null
   }
-}
+]

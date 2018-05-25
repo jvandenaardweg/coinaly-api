@@ -29,7 +29,8 @@
   },
   "jest": {
     "moduleFileExtensions": [
-      "js"
+      "js",
+      "json"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/app/$1"
