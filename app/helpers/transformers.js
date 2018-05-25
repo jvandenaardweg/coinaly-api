@@ -28,8 +28,6 @@ function transformObjectsCryptocompareToArray (objects) {
       }
     }
 
-    console.log(iconColor)
-
     const newObject = {
       id: objects[key].Symbol,
       name: objects[key].CoinName,

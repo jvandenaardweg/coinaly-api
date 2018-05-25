@@ -50,7 +50,7 @@
     "boom": "^7.2.0",
     "ccxt": "^1.14.63",
     "crypto-js": "^3.1.9-1",
-    "cryptocurrency-icons": "git+https://github.com/cjdowner/cryptocurrency-icons.git",
+    "cryptocurrency-icons": "github:cjdowner/cryptocurrency-icons#master",
     "dotenv": "^5.0.1",
     "es6-promise": "^4.2.4",
     "forever": "^0.15.3",
