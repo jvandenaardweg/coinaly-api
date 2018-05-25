@@ -12,10 +12,10 @@ describe('database/methods/symbols.js', () => {
   //   done()
   // })
 
-  it('insertNewSymbols should insert new symbols from the external API', async (done) => {
-    const result = await insertNewSymbols()
-    expect(typeof result).toBe('boolean')
-    done()
-  })
+  // it('insertNewSymbols should insert new symbols from the external API', async (done) => {
+  //   const result = await insertNewSymbols()
+  //   expect(typeof result).toBe('boolean')
+  //   done()
+  // })
 
 })
