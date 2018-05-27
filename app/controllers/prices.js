@@ -4,6 +4,7 @@ const Boom = require('boom')
 const { convertObjectToKeyString, convertKeyStringToObject } = require('../helpers/objects')
 const redis = require('../cache/redis')
 const { getAllPrices, insertNewPrices } = require('../database/methods/prices')
+const fetch = require('node-fetch')
 
 async function setCache (result) {
   const resultStringHMSET = convertObjectToKeyString(result)
@@ -38,6 +39,42 @@ class Prices {
         const result = await getAllPrices()
         await setCache(result)
         return result
+      } catch (error) {
+        return Boom.badImplementation(error)
+      }
+    })()
+  }
+
+  history (request, h) {
+    const baseId = request.query.baseId
+    const quoteId = request.query.quoteId
+    const interval = request.query.interval
+    const symbol = baseId + '/' + quoteId
+    const cacheName = `public:prices:history:${symbol}:${interval}`
+    let limit = 31
+
+    if (interval === '1w') {
+      limit = 7
+    } else if (interval === '1m') {
+      limit = 31
+      limit = 93
+    }
+
+    return (async () => {
+      try {
+        const cachedPricesHistory = await redis.hget(cacheName, symbol)
+        if (cachedPricesHistory) {
+          return JSON.parse(cachedPricesHistory)
+        }
+
+        const result = await fetch(`https://min-api.cryptocompare.com/data/histoday?fsym=${baseId}&tsym=${quoteId}&limit=${limit}`).then(response => response.json())
+        const prices = result.Data
+        const data = {
+          [symbol]: prices
+        }
+        await redis.hset(cacheName, symbol, JSON.stringify(data))
+        await redis.expire(cacheName, 3600) // 1 hour
+        return data
       } catch (error) {
         return Boom.badImplementation(error)
       }
