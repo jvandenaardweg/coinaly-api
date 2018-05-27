@@ -4,29 +4,21 @@ const { getAllActiveExchanges, getAllExchanges, getExchangeBySlug } = require('.
 class Exchanges {
 
   index (request, h) {
+    const slug = request.query.slug
+    let exchanges
+
     return(async() => {
       try {
-        const exchanges = await getAllExchanges()
+        if (slug) {
+          exchanges = await getExchangeBySlug(slug)
+        } else {
+          exchanges = await getAllExchanges()
+        }
         if (exchanges) return exchanges
         return Boom.notFound('No exchanges found.')
       } catch (err) {
-        console.log('Error while retrieving all the exchanges', err)
-        return Boom.badImplementation('There was an error retrieving all the exchanges.')
-      }
-    })()
-  }
-
-  show (request, h) {
-    const slug = request.query.slug
-
-    return(async() => {
-      try {
-        const exchange = await getExchangeBySlug(slug)
-        if (exchange) return exchange
-        return Boom.notFound('No exchange found.')
-      } catch (err) {
-        console.log('Error while retrieving an exchange by slug', err)
-        return Boom.badImplementation('There was an error retrieving the exchange.')
+        console.log('Error while retrieving the exchanges', err)
+        return Boom.badImplementation('There was an error retrieving the exchanges.')
       }
     })()
   }

@@ -4,10 +4,15 @@ const Joi = require('joi')
 module.exports = [
   {
     method: 'GET',
-    path: '/exchanges/all',
+    path: '/exchanges',
     handler: exchangesController.index,
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        query: {
+          slug: Joi.string()
+        }
+      }
     }
   },
   {
@@ -16,19 +21,6 @@ module.exports = [
     handler: exchangesController.active,
     options: {
       auth: false
-    }
-  },
-  {
-    method: 'GET',
-    path: '/exchanges/{slug?}',
-    handler: exchangesController.show,
-    options: {
-      auth: false,
-      validate: {
-        query: {
-          slug: Joi.string()
-        }
-      }
     }
   }
 ]
