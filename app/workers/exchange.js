@@ -7,9 +7,7 @@ class ExchangeWorker {
     this.redis = redis
     this.supportedExchanges = ['bittrex', 'binance', 'poloniex']
 
-    if (this.supportedExchanges.includes(exchangeSlug)) {
-      // this.createCCXTInstance(userId)
-    } else {
+    if (!this.supportedExchanges.includes(exchangeSlug)) {
       throw new Error(`The exchange "${exchangeSlug}" is currently not supported.`)
     }
   }
@@ -17,15 +15,6 @@ class ExchangeWorker {
   setApiCredentials (userId, plainTextApiKey, plainTextApiSecret) {
     if (!this.ccxt[userId]) {
       this.createCCXTInstance(userId, plainTextApiKey, plainTextApiSecret)
-    }
-  }
-
-  removeApiCredentials (userId) {
-    if (this.ccxt[userId]) {
-      this.ccxt.apiKey = null
-      this.ccxt.secret = null
-    } else {
-      throw new Error('CCXT is not created in this instance, so we cannot remove the API credentials.')
     }
   }
 
@@ -350,7 +339,6 @@ class ExchangeWorker {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
         result = await this.ccxt[userId].fetchOrders()
-        this.removeApiCredentials()
         this.setCache(cacheKey, JSON.stringify(result))
       }
       return result
