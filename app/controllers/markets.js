@@ -14,7 +14,7 @@ class Markets {
 
   fetch (request, h) {
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
@@ -25,14 +25,18 @@ class Markets {
         result = await ExchangeWorkers[exchangeSlug].fetchMarkets(forceRefresh)
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }
 
   load (request, h) {
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
@@ -42,7 +46,11 @@ class Markets {
         result = await ExchangeWorkers[exchangeSlug].loadMarkets(forceRefresh)
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }
@@ -51,14 +59,18 @@ class Markets {
     const forceRefresh = request.query.forceRefresh
     const marketSymbol = request.query.marketSymbol
     const interval = request.query.interval
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
         const result = await ExchangeWorkers[exchangeSlug].fetchOHLCV(marketSymbol, interval, forceRefresh)
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }

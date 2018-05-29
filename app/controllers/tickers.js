@@ -9,7 +9,7 @@ class Tickers {
 
   index (request, h) {
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
@@ -18,14 +18,18 @@ class Tickers {
         const resultJSON = convertKeyStringToObject(result)
         return resultJSON
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }
 
   show (request, h) {
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
     const symbol = request.query.symbol
 
     return (async () => {
@@ -40,7 +44,11 @@ class Tickers {
 
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }

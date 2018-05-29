@@ -12,7 +12,7 @@ class Deposits {
   address (request, h) {
     const userId = request.auth.credentials.id
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
     const symbolId = request.query.symbolId
 
     return (async () => {
@@ -21,12 +21,16 @@ class Deposits {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+        ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
-        const result = await ExchangeWorkers[exchangeSlug].fetchDepositAddress(symbolId, userId, forceRefresh)
+        const result = await ExchangeWorkers[exchange].fetchDepositAddress(symbolId, userId, forceRefresh)
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }

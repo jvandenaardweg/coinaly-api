@@ -10,18 +10,18 @@ class Orders {
   index (request, h) {
     const userId = request.auth.credentials.id
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchange = request.params.exchange
 
     return (async () => {
       try {
-        const exchange = await getExchangeBySlug(exchangeSlug) // TODO: change slug to use just the ID in the request.params?
+        const exchange = await getExchangeBySlug(exchange) // TODO: change slug to use just the ID in the request.params?
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
-          ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
           try {
-            const result = await ExchangeWorkers[exchangeSlug].fetchOrders(forceRefresh, userId)
+            const result = await ExchangeWorkers[exchange].fetchOrders(forceRefresh, userId)
             return result
           } catch (error) {
             return Boom.badImplementation(error)
@@ -54,17 +54,17 @@ class Orders {
     const userId = request.auth.credentials.id
     const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchange = request.params.exchange
 
     return (async () => {
       try {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
 
         try {
-          ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
           try {
-            const result = await ExchangeWorkers[exchangeSlug].fetchClosedOrders(forceRefresh, userId)
+            const result = await ExchangeWorkers[exchange].fetchClosedOrders(forceRefresh, userId)
             return result
           } catch (err) {
             console.log(err)
@@ -87,17 +87,17 @@ class Orders {
     const userId = request.auth.credentials.id
     const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchange = request.params.exchange
 
     return (async () => {
       try {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
 
         try {
-          ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
           try {
-            const result = await ExchangeWorkers[exchangeSlug].fetchOpenOrders(forceRefresh, userId)
+            const result = await ExchangeWorkers[exchange].fetchOpenOrders(forceRefresh, userId)
             return result
           } catch (err) {
             console.log(err)
@@ -122,10 +122,75 @@ class Orders {
     }
   }
 
-  create (request, h) {
-    return {
-      message: 'create buy/sell limit or market order'
-    }
+  createLimitOrder (request, h) {
+    const userId = request.auth.credentials.id
+    const exchangeSlug = request.params.exchange
+
+    const side = request.payload.side
+    const symbol = request.payload.symbol
+    const amount = request.payload.amount
+    const price = request.payload.price
+    const params = null
+
+    return (async () => {
+      try {
+        let result
+        const exchange = await getExchangeBySlug(exchangeSlug)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
+
+        // Set key and secret for current user
+        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+        if (side === 'buy') {
+          result = await ExchangeWorkers[exchangeSlug].createLimitBuyOrder(symbol, amount, price, params, userId)
+        } else {
+          result = await ExchangeWorkers[exchangeSlug].createLimitSellOrder(symbol, amount, price, params, userId)
+        }
+        return result
+      } catch (error) {
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
+      }
+    })()
+  }
+
+  createMarketOrder (request, h) {
+    const userId = request.auth.credentials.id
+    const exchangeSlug = request.params.exchange
+
+    const side = request.payload.side
+    const symbol = request.payload.symbol
+    const amount = request.payload.amount
+    const price = request.payload.price
+    const params = null
+
+    return (async () => {
+      try {
+        let result
+        const exchange = await getExchangeBySlug(exchangeSlug)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
+
+        // Set key and secret for current user
+        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+        if (side === 'buy') {
+          result = await ExchangeWorkers[exchangeSlug].createMarketBuyOrder(symbol, amount, price, params, userId)
+        } else {
+          result = await ExchangeWorkers[exchangeSlug].createMarketSellOrder(symbol, amount, price, params, userId)
+        }
+
+        return result
+      } catch (error) {
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
+      }
+    })()
   }
 
   delete (request, h) {

@@ -41,11 +41,36 @@ module.exports = [
   },
   {
     method: 'POST',
-    path: '/exchanges/{exchange}/orders',
-    handler: ordersController.create,
+    path: '/exchanges/{exchange}/orders/limit',
+    handler: ordersController.createLimitOrder,
     options: {
       auth: 'jwt',
-      validate: routeValidations
+      validate: {
+        ...routeValidations,
+        payload: {
+          side: Joi.string().required().valid('buy', 'sell'),
+          symbol: Joi.string().required(),
+          amount: Joi.number().required(),
+          price: Joi.number().required()
+        }
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/exchanges/{exchange}/orders/market',
+    handler: ordersController.createMarketOrder,
+    options: {
+      auth: 'jwt',
+      validate: {
+        ...routeValidations,
+        payload: {
+          side: Joi.string().required().valid('buy', 'sell'),
+          symbol: Joi.string().required(),
+          amount: Joi.number().required(),
+          price: Joi.number().required()
+        }
+      }
     }
   }
 ]

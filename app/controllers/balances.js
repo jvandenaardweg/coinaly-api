@@ -19,7 +19,7 @@ class Balances {
   index (request, h) {
     const userId = request.auth.credentials.id
     const forceRefresh = request.query.forceRefresh
-    const exchangeSlug = (request.params.exchange) ? request.params.exchange.toLowerCase() : null
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
@@ -32,7 +32,11 @@ class Balances {
         const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
         return result
       } catch (error) {
-        return Boom.badImplementation(error)
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
       }
     })()
   }

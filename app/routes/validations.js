@@ -2,8 +2,7 @@ const Joi = require('joi')
 
 const validations = {
   params: {
-    exchange: Joi.string().valid('bittrex', 'binance', 'poloniex'),
-    status: Joi.string().valid('open', 'closed')
+    exchange: Joi.string().lowercase().valid('bittrex', 'binance', 'poloniex')
   },
   query: {
     forceRefresh: Joi.boolean(),

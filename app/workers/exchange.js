@@ -47,43 +47,106 @@ class ExchangeWorker {
   }
 
   handleCCXTInstanceError (error) {
+    // Create custom messages with the available errors
+    // So we can show these friendly message to the user
+    // More: https://github.com/ccxt/ccxt/wiki/Manual#error-handling
+    // We break up the error in 2 sections: NetworkError and ExchangeError
+    /*
+    + BaseError
+    |
+    +---+ ExchangeError
+    |   |
+    |   +---+ NotSupported
+    |   |
+    |   +---+ AuthenticationError
+    |   |   |
+    |   |   +---+ PermissionDenied
+    |   |
+    |   +---+ InsufficientFunds
+    |   |
+    |   +---+ InvalidAddress
+    |   |
+    |   +---+ InvalidOrder
+    |       |
+    |       +---+ OrderNotFound
+    |
+    +---+ NetworkError (recoverable)
+        |
+        +---+ DDoSProtection
+        |
+        +---+ RequestTimeout
+        |
+        +---+ ExchangeNotAvailable
+        |
+        +---+ InvalidNonce
+    */
+
     let message
-    let reason = null
-    let exchangeErrorCode = null
-    if (error instanceof ccxt.DDoSProtection || error.message.includes('ECONNRESET')) {
-      message = error.message
-      reason = 'ddos protection'
-      console.log('CCXT:', 'Error', 'DDOS Protection')
-    } else if (error instanceof ccxt.RequestTimeout) {
-      message = error.message
-      reason = 'request timeout'
-      console.log('CCXT:', 'Error', 'Request Timeout')
-    } else if (error instanceof ccxt.AuthenticationError) {
-      message = error.message
-      reason = 'authentication error'
-      console.log('CCXT:', 'Error', 'Authenticfation Error')
-    } else if (error instanceof ccxt.ExchangeNotAvailable) {
-      message = error.message
-      reason = 'exchange not available error'
-      console.log('CCXT:', 'Error', 'Exchange Not Available')
-    } else if (error instanceof ccxt.ExchangeError) {
-      message = error.message
-      reason = 'exchange error'
-      console.log('CCXT:', 'Error', 'Exchange Error')
+    const errorName = error.constructor.name
+
+    if (error instanceof ccxt.ExchangeError) {
+      if (error instanceof ccxt.NotSupported) {
+        message = `There ${this.exchangeSlug} exchange does not support this.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.AuthenticationError) {
+        if (error instanceof ccxt.PermissionDenied) {
+          message = `The ${this.exchangeSlug} exchange responded with a Permission Denied error while authenticating. Is your API key and secret correct and active?`
+          console.log('CCXT:', 'Error', errorName, message)
+          throw message
+        } else {
+          message = `There was an error authenticating with the ${this.exchangeSlug} exchange. Is your API key and secret correct and active?`
+          console.log('CCXT:', 'Error', errorName, message)
+          throw message
+        }
+      } else if (error instanceof ccxt.InsufficientFunds) {
+        message = `It seems you do not have sufficient funds available on the ${this.exchangeSlug} exchange.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.InvalidAddress) {
+        message = 'The address is invalid.'
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.InvalidOrder) {
+        if (error instanceof ccxt.OrderNotFound) {
+          message = 'The order is not found.'
+          console.log('CCXT:', 'Error', errorName, message)
+          throw message
+        } else {
+          message = 'The order is invalid.'
+          console.log('CCXT:', 'Error', errorName, message)
+          throw message
+        }
+      } else {
+        message = `The ${this.exchangeSlug} exchange responded with an uknown error. Is your API key and secret correct and active? If so, you should try again.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      }
     } else if (error instanceof ccxt.NetworkError) {
-      message = error.message
-      reason = 'network error'
-      console.log('CCXT:', 'Error', 'Network Error')
+      if (error instanceof ccxt.DDoSProtection || error.message.includes('ECONNRESET')) {
+        message = `The exchange ${this.exchangeSlug} seems to be under heavy load and activated DDoS protection. You should try again later.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.RequestTimeout) {
+        message = `There was a delay in communicating with the ${this.exchangeSlug} exchange. You should try again.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.ExchangeNotAvailable) {
+        message = `The exchange ${this.exchangeSlug} does not seem to be available right now. You should try again later.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else if (error instanceof ccxt.InvalidNonce) {
+        message = `The "nonce" used to communicate with the ${this.exchangeSlug} exchange seems to be invalid. Contact us when this keeps happening.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      } else {
+        message = `There was a network error while communicating with the ${this.exchangeSlug} exchange. You should try again later.`
+        console.log('CCXT:', 'Error', errorName, message)
+        throw message
+      }
     } else {
-      message = error.message
+      throw error
     }
-
-
-    console.log('CCXT:', 'Error', message)
-    throw new Error(message)
-
-    // TODO: if error, restart instance?
-    // this.handleSentryError(`${this.exchangeSlug} Worker: CCXT Exchange Error: ${message}`)
   }
 
   // Public
@@ -348,6 +411,67 @@ class ExchangeWorker {
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async createLimitBuyOrder (symbol, amount, price, params = {}, userId) {
+    console.log('Exchange Worker (private method):', 'Create Limit Buy Order', `/ User ID: ${userId}`)
+
+    try {
+      const result = await this.ccxt.createLimitBuyOrder(symbol, amount, price, params)
+      this.removeApiCredentials()
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+  async createLimitSellOrder (symbol, amount, price, params = {}, userId) {
+    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
+
+    try {
+      const result = await this.ccxt.createLimitSellOrder(symbol, amount, price, params)
+      this.removeApiCredentials()
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async createMarketBuyOrder (symbol, amount, price, params = {}, userId) {
+    console.log('Exchange Worker (private method):', 'Create Market Buy Order', `/ User ID: ${userId}`)
+
+    try {
+      const result = await this.ccxt.createMarketBuyOrder(symbol, amount, price, params)
+      this.removeApiCredentials()
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+  async createMarketSellOrder (symbol, amount, price, params = {}, userId) {
+    console.log('Exchange Worker (private method):', 'Create Market Sell Order', `/ User ID: ${userId}`)
+
+    try {
+      const result = await this.ccxt.createMarketSellOrder (symbol, amount, price, params)
+      this.removeApiCredentials()
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async createLimitSellOrder (symbol, amount, price, params = {}, userId) {
+    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
+
+    try {
+      const result = await this.ccxt.createLimitSellOrder (symbol, amount, price, params)
+      this.removeApiCredentials()
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
