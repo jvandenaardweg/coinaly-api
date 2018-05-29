@@ -29,7 +29,7 @@ class ExchangeWorker {
         apiKey: plainTextApiKey,
         secret: plainTextApiSecret
       })
-      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker:`, `Worker instance for User ID "${userId}" for "${this.exchangeSlug}" created.`)
+      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker (creation):`, `Worker instance for User ID "${userId}" for "${this.exchangeSlug}" created.`)
     } catch (error) {
       console.log(`Exchange Worker:`, `FAILED to create worker instance for ${this.exchangeSlug} created.`)
       this.handleCCXTInstanceError(error)
@@ -104,7 +104,7 @@ class ExchangeWorker {
           console.log('CCXT:', 'Error', errorName, message)
           throw message
         } else {
-          message = 'The order is invalid.'
+          message = 'The order is invalid. It might already be deleted. Or the order just never existed.'
           console.log('CCXT:', 'Error', errorName, message)
           throw message
         }
@@ -143,6 +143,7 @@ class ExchangeWorker {
   // Public
   // Markets are cached for 1 hour
   async fetchMarkets (forceRefresh) {
+    console.time(`Exchange Worker (public method) (fetchMarkets)`)
     console.log(`Exchange Worker (public method):`, `Fetch Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:fetch:${this.exchangeSlug}`
@@ -167,12 +168,15 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (public method) (fetchMarkets)`)
     }
   }
 
   // Public
   // Markets are cached for 1 hour
   async loadMarkets (forceRefresh) {
+    console.time(`Exchange Worker (public method) (loadMarkets)`)
     console.log(`Exchange Worker (public method):`, `Load Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:load:${this.exchangeSlug}`
@@ -197,12 +201,15 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.time(`Exchange Worker (public method) (loadMarkets)`)
     }
   }
 
   // Public
   // Tickers are cached for 5 seconds
   async fetchTickers (forceRefresh) {
+    console.time(`Exchange Worker (public method) (fetchTickers)`)
     console.log(`Exchange Worker (public method):`, `Fetch All Tickers, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:tickers:${this.exchangeSlug}`
@@ -225,14 +232,17 @@ class ExchangeWorker {
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
       }
       return result
-    }  catch (error) {
+    } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (public method) (fetchTickers)`)
     }
   }
 
   // Public
   // Ticker is cached for 5 seconds
   async fetchTicker (symbol, forceRefresh) {
+    console.time(`Exchange Worker (public method) (fetchTicker)`)
     console.log(`Exchange Worker (public method):`, `Fetch Ticker, for "${symbol}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:ticker:${this.exchangeSlug}:${symbol}`
@@ -255,13 +265,16 @@ class ExchangeWorker {
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
       }
       return result
-    }  catch (error) {
+    } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (public method) (fetchTicker)`)
     }
   }
 
   // Public method
   async fetchOHLCV (marketSymbol, interval = '1m', forceRefresh) {
+    console.time(`Exchange Worker (public method) (fetchOHLCV)`)
     console.log(`Exchange Worker (public method):`, `Fetch OHLCV, for "${marketSymbol}" on "${this.exchangeSlug}".`)
 
     const cacheKey = `public:exchanges:ohlcv:${this.exchangeSlug}:${marketSymbol}:${interval}`
@@ -284,13 +297,16 @@ class ExchangeWorker {
         this.setCache(cacheKey, JSON.stringify(result), 1800) // 30 minutes
       }
       return result
-    }  catch (error) {
+    } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (public method) (fetchOHLCV)`)
     }
   }
 
   // Private (needs userId)
   async fetchBalance (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (fetchBalance) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Fetch Balance, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:balances:${this.exchangeSlug}:${userId}`
@@ -309,17 +325,19 @@ class ExchangeWorker {
       } else {
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
         result = await this.ccxt[userId].fetchBalance()
-        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (fetchBalance) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (fetchOrders) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Fetch Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${userId}`
@@ -344,11 +362,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (fetchOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchClosedOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (fetchClosedOrders) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Fetch Closed Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:closed:${this.exchangeSlug}:${userId}`
@@ -373,11 +394,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (fetchClosedOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchOpenOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (fetchOpenOrders) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Fetch Open Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:open:${this.exchangeSlug}:${userId}`
@@ -402,11 +426,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (fetchOpenOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createLimitBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (createLimitBuyOrder) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Create Limit Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -415,11 +442,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (createLimitBuyOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createLimitSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (createLimitSellOrder) (User ID "${userId}")`)
     onsole.log('Exchange Worker (private method):', `Create Limit Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -428,11 +458,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (createLimitSellOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createMarketBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (createMarketBuyOrder) (User ID "${userId}")`)
     onsole.log('Exchange Worker (private method):', `Create Market Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -441,11 +474,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (createMarketBuyOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createMarketSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (createMarketSellOrder) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Create Market Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -454,11 +490,14 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (createMarketSellOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async cancelOrder(orderUuid, userId, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (cancelOrder) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Cancel Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -467,12 +506,15 @@ class ExchangeWorker {
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.time(`Exchange Worker (private method) (cancelOrder) (User ID "${userId}")`)
     }
   }
 
   // Private
   // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
   async fetchDepositAddress (symbolId, userId, forceRefresh, plainTextApiKey, plainTextApiSecret) {
+    console.time(`Exchange Worker (private method) (fetchDepositAddress) (User ID "${userId}")`)
     console.log('Exchange Worker (private method):', `Fetch Deposit Address, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
@@ -481,6 +523,8 @@ class ExchangeWorker {
       return result
     }  catch (error) {
       return this.handleCCXTInstanceError(error)
+    } finally {
+      console.timeEnd(`Exchange Worker (private method) (fetchDepositAddress) (User ID "${userId}")`)
     }
   }
 

@@ -1,6 +1,6 @@
 'use strict'
 require('dotenv').config({ path: '../.env' })
-// const newrelic = require('newrelic')
+
 const Raven = require('raven')
 
 // Error reporting monitoring
