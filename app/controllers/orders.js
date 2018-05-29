@@ -24,7 +24,11 @@ class Orders {
             const result = await ExchangeWorkers[exchange].fetchOrders(forceRefresh, userId)
             return result
           } catch (error) {
-            return Boom.badImplementation(error)
+            if (typeof error === 'string') {
+              return Boom.badRequest(error)
+            } else {
+              return Boom.badImplementation(error)
+            }
           }
 
         } catch (err) {
