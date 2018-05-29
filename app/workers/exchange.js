@@ -18,7 +18,7 @@ class ExchangeWorker {
     }
   }
 
-  // Creates a CCXT instance, without API credentials
+  // Create a CCXT instance for each user to talk with the exchange
   createCCXTInstance (userId, plainTextApiKey, plainTextApiSecret) {
     try {
       this.ccxt[userId] = new ccxt[this.exchangeSlug]({
@@ -143,7 +143,7 @@ class ExchangeWorker {
   // Public
   // Markets are cached for 1 hour
   async fetchMarkets (forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Fetch Markets')
+    console.log(`Exchange Worker (public method):`, `Fetch Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:fetch:${this.exchangeSlug}`
 
@@ -173,7 +173,7 @@ class ExchangeWorker {
   // Public
   // Markets are cached for 1 hour
   async loadMarkets (forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Load Markets')
+    console.log(`Exchange Worker (public method):`, `Load Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:load:${this.exchangeSlug}`
 
@@ -203,7 +203,7 @@ class ExchangeWorker {
   // Public
   // Tickers are cached for 5 seconds
   async fetchTickers (forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Fetch Tickers (multiple)')
+    console.log(`Exchange Worker (public method):`, `Fetch All Tickers, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:tickers:${this.exchangeSlug}`
 
@@ -233,7 +233,7 @@ class ExchangeWorker {
   // Public
   // Ticker is cached for 5 seconds
   async fetchTicker (symbol, forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Fetch Ticker (single)')
+    console.log(`Exchange Worker (public method):`, `Fetch Ticker, for "${symbol}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:ticker:${this.exchangeSlug}:${symbol}`
 
@@ -262,7 +262,7 @@ class ExchangeWorker {
 
   // Public method
   async fetchOHLCV (marketSymbol, interval = '1m', forceRefresh) {
-    console.log(`Exchange Worker (public method):`, 'Fetch OHLCV')
+    console.log(`Exchange Worker (public method):`, `Fetch OHLCV, for "${marketSymbol}" on "${this.exchangeSlug}".`)
 
     const cacheKey = `public:exchanges:ohlcv:${this.exchangeSlug}:${marketSymbol}:${interval}`
 
@@ -291,7 +291,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async fetchBalance (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Fetch Balance', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Fetch Balance, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:balances:${this.exchangeSlug}:${userId}`
 
@@ -320,7 +320,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async fetchOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Fetch Orders', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Fetch Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${userId}`
 
@@ -349,7 +349,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async fetchClosedOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Fetch Closed Orders', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Fetch Closed Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:closed:${this.exchangeSlug}:${userId}`
 
@@ -378,7 +378,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async fetchOpenOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Fetch Open Orders', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Fetch Open Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:open:${this.exchangeSlug}:${userId}`
 
@@ -407,7 +407,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async createLimitBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Create Limit Buy Order', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Create Limit Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
@@ -420,7 +420,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async createLimitSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
+    onsole.log('Exchange Worker (private method):', `Create Limit Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
@@ -433,7 +433,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async createMarketBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Create Market Buy Order', `/ User ID: ${userId}`)
+    onsole.log('Exchange Worker (private method):', `Create Market Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
@@ -446,7 +446,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async createMarketSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Create Market Sell Order', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Create Market Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
@@ -459,7 +459,7 @@ class ExchangeWorker {
 
   // Private (needs userId)
   async cancelOrder(orderUuid, userId, plainTextApiKey, plainTextApiSecret) {
-    console.log('Exchange Worker (private method):', 'Cancel Order', `/ User ID: ${userId}`)
+    console.log('Exchange Worker (private method):', `Cancel Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
@@ -473,7 +473,7 @@ class ExchangeWorker {
   // Private
   // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
   async fetchDepositAddress (symbolId, userId, forceRefresh, plainTextApiKey, plainTextApiSecret) {
-    console.log(`Exchange Worker (private method):`, 'Fetch Deposit Address')
+    console.log('Exchange Worker (private method):', `Fetch Deposit Address, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
