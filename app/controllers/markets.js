@@ -20,7 +20,7 @@ class Markets {
       try {
         let result
 
-        ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
 
         result = await ExchangeWorkers[exchangeSlug].fetchMarkets(forceRefresh)
         return result
@@ -41,7 +41,7 @@ class Markets {
     return (async () => {
       try {
         let result
-        ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(null, null)
 
         result = await ExchangeWorkers[exchangeSlug].loadMarkets(forceRefresh)
         return result

@@ -20,10 +20,7 @@ class Deposits {
         const exchange = await getExchangeBySlug(exchangeSlug) // TODO: change slug to use just the ID in the request.params?
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
-        // Set key and secret for current user
-        ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
-
-        const result = await ExchangeWorkers[exchange].fetchDepositAddress(symbolId, userId, forceRefresh)
+        const result = await ExchangeWorkers[exchange].fetchDepositAddress(symbolId, userId, forceRefresh, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         return result
       } catch (error) {
         if (typeof error === 'string') {

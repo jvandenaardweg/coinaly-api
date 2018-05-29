@@ -27,9 +27,9 @@ class Balances {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
-        const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId)
+        const result = await ExchangeWorkers[exchangeSlug].fetchBalance(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         return result
       } catch (error) {
         if (typeof error === 'string') {

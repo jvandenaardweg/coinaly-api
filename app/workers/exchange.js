@@ -2,28 +2,26 @@ const ccxt = require('ccxt')
 
 class ExchangeWorker {
   constructor (exchangeSlug, redis) {
+    this.ccxt = {}
     this.exchangeSlug = exchangeSlug.toLowerCase()
     this.redis = redis
     this.supportedExchanges = ['bittrex', 'binance', 'poloniex']
 
     if (this.supportedExchanges.includes(exchangeSlug)) {
-      this.createCCXTInstance()
+      // this.createCCXTInstance(userId)
     } else {
       throw new Error(`The exchange "${exchangeSlug}" is currently not supported.`)
     }
   }
 
-  setApiCredentials (apiKey, apiSecret) {
-    if (this.ccxt) {
-      this.ccxt.apiKey = apiKey
-      this.ccxt.secret = apiSecret
-    } else {
-      throw new Error('CCXT is not created in this instance, so we cannot set the API credentials.')
+  setApiCredentials (userId, plainTextApiKey, plainTextApiSecret) {
+    if (!this.ccxt[userId]) {
+      this.createCCXTInstance(userId, plainTextApiKey, plainTextApiSecret)
     }
   }
 
-  removeApiCredentials () {
-    if (this.ccxt) {
+  removeApiCredentials (userId) {
+    if (this.ccxt[userId]) {
       this.ccxt.apiKey = null
       this.ccxt.secret = null
     } else {
@@ -32,14 +30,17 @@ class ExchangeWorker {
   }
 
   // Creates a CCXT instance, without API credentials
-  createCCXTInstance () {
+  createCCXTInstance (userId, plainTextApiKey, plainTextApiSecret) {
     try {
-      this.ccxt = new ccxt[this.exchangeSlug]({
+      this.ccxt[userId] = new ccxt[this.exchangeSlug]({
+        id: userId,
         timeout: 15000,
         enableRateLimit: true,
-        verbose: true
+        verbose: false,
+        apiKey: plainTextApiKey,
+        secret: plainTextApiSecret
       })
-      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker:`, `Worker instance for ${this.exchangeSlug} created.`)
+      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker:`, `Worker instance for User ID "${userId}" for "${this.exchangeSlug}" created.`)
     } catch (error) {
       console.log(`Exchange Worker:`, `FAILED to create worker instance for ${this.exchangeSlug} created.`)
       this.handleCCXTInstanceError(error)
@@ -96,6 +97,7 @@ class ExchangeWorker {
           throw message
         } else {
           message = `There was an error authenticating with the ${this.exchangeSlug} exchange. Is your API key and secret correct and active?`
+          console.log(error)
           console.log('CCXT:', 'Error', errorName, message)
           throw message
         }
@@ -118,7 +120,7 @@ class ExchangeWorker {
           throw message
         }
       } else {
-        message = `The ${this.exchangeSlug} exchange responded with an uknown error. Is your API key and secret correct and active? If so, you should try again.`
+        message = `The ${this.exchangeSlug} exchange responded with an unknown error. Is your API key and secret correct and active? If so, you should try again.`
         console.log('CCXT:', 'Error', errorName, message)
         throw message
       }
@@ -168,8 +170,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        this.removeApiCredentials()
-        result = await this.ccxt.fetchMarkets()
+        this.setApiCredentials('public', null, null)
+        result = await this.ccxt['public'].fetchMarkets()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -198,8 +200,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        this.removeApiCredentials()
-        result = await this.ccxt.loadMarkets()
+        this.setApiCredentials('public', null, null)
+        result = await this.ccxt['public'].loadMarkets()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -228,8 +230,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        this.removeApiCredentials()
-        result = await this.ccxt.fetchTickers()
+        this.setApiCredentials('public', null, null)
+        result = await this.ccxt['public'].fetchTickers()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
       }
@@ -258,8 +260,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        this.removeApiCredentials()
-        result = await this.ccxt.fetchTicker(symbol)
+        this.setApiCredentials('public', null, null)
+        result = await this.ccxt['public'].fetchTicker(symbol)
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 5) // 5 = 5 seconds
       }
@@ -287,8 +289,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        this.removeApiCredentials()
-        result = await this.ccxt.fetchOHLCV(marketSymbol, interval)
+        this.setApiCredentials('public', null, null)
+        result = await this.ccxt['public'].fetchOHLCV(marketSymbol, interval)
         // if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result), 1800) // 30 minutes
       }
@@ -299,7 +301,7 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async fetchBalance (forceRefresh, userId) {
+  async fetchBalance (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Fetch Balance', `/ User ID: ${userId}`)
 
     const cacheKey = `private:exchanges:balances:${this.exchangeSlug}:${userId}`
@@ -316,8 +318,8 @@ class ExchangeWorker {
       if (result) {
         result = JSON.parse(result)
       } else {
-        result = await this.ccxt.fetchBalance()
-        this.removeApiCredentials()
+        this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        result = await this.ccxt[userId].fetchBalance()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -328,7 +330,7 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async fetchOrders (forceRefresh, userId) {
+  async fetchOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Fetch Orders', `/ User ID: ${userId}`)
 
     const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${userId}`
@@ -346,9 +348,9 @@ class ExchangeWorker {
         result = JSON.parse(result)
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
-        result = await this.ccxt.fetchOrders()
+        this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        result = await this.ccxt[userId].fetchOrders()
         this.removeApiCredentials()
-        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))
       }
       return result
@@ -358,7 +360,7 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async fetchClosedOrders (forceRefresh, userId) {
+  async fetchClosedOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Fetch Closed Orders', `/ User ID: ${userId}`)
 
     const cacheKey = `private:exchanges:orders:closed:${this.exchangeSlug}:${userId}`
@@ -376,9 +378,8 @@ class ExchangeWorker {
         result = JSON.parse(result)
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
-        result = await this.ccxt.fetchClosedOrders()
-        this.removeApiCredentials()
-        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        result = await this.ccxt[userId].fetchClosedOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
       return result
@@ -388,7 +389,7 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async fetchOpenOrders (forceRefresh, userId) {
+  async fetchOpenOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Fetch Open Orders', `/ User ID: ${userId}`)
 
     const cacheKey = `private:exchanges:orders:open:${this.exchangeSlug}:${userId}`
@@ -406,9 +407,8 @@ class ExchangeWorker {
         result = JSON.parse(result)
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
-        result = await this.ccxt.fetchOpenOrders()
-        this.removeApiCredentials()
-        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        result = await this.ccxt[userId].fetchOpenOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
       return result
@@ -418,23 +418,12 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async createLimitBuyOrder (symbol, amount, price, params = {}, userId) {
+  async createLimitBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Create Limit Buy Order', `/ User ID: ${userId}`)
 
     try {
-      const result = await this.ccxt.createLimitBuyOrder(symbol, amount, price, params)
-      this.removeApiCredentials()
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-  async createLimitSellOrder (symbol, amount, price, params = {}, userId) {
-    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
-
-    try {
-      const result = await this.ccxt.createLimitSellOrder(symbol, amount, price, params)
-      this.removeApiCredentials()
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].createLimitBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
@@ -442,23 +431,25 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async createMarketBuyOrder (symbol, amount, price, params = {}, userId) {
+  async createLimitSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
+
+    try {
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].createLimitSellOrder(symbol, amount, price, params)
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async createMarketBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
     console.log('Exchange Worker (private method):', 'Create Market Buy Order', `/ User ID: ${userId}`)
 
     try {
-      const result = await this.ccxt.createMarketBuyOrder(symbol, amount, price, params)
-      this.removeApiCredentials()
-      return result
-    } catch (error) {
-      return this.handleCCXTInstanceError(error)
-    }
-  }
-  async createMarketSellOrder (symbol, amount, price, params = {}, userId) {
-    console.log('Exchange Worker (private method):', 'Create Market Sell Order', `/ User ID: ${userId}`)
-
-    try {
-      const result = await this.ccxt.createMarketSellOrder (symbol, amount, price, params)
-      this.removeApiCredentials()
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].createMarketBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
@@ -466,12 +457,25 @@ class ExchangeWorker {
   }
 
   // Private (needs userId)
-  async createLimitSellOrder (symbol, amount, price, params = {}, userId) {
-    console.log('Exchange Worker (private method):', 'Create Limit Sell Order', `/ User ID: ${userId}`)
+  async createMarketSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
+    console.log('Exchange Worker (private method):', 'Create Market Sell Order', `/ User ID: ${userId}`)
 
     try {
-      const result = await this.ccxt.createLimitSellOrder (symbol, amount, price, params)
-      this.removeApiCredentials()
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].createMarketSellOrder (symbol, amount, price, params)
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async cancelOrder(orderUuid, userId, plainTextApiKey, plainTextApiSecret) {
+    console.log('Exchange Worker (private method):', 'Cancel Order', `/ User ID: ${userId}`)
+
+    try {
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].cancelOrder(orderUuid)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
@@ -480,12 +484,12 @@ class ExchangeWorker {
 
   // Private
   // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
-  async fetchDepositAddress (symbolId, userId, forceRefresh) {
+  async fetchDepositAddress (symbolId, userId, forceRefresh, plainTextApiKey, plainTextApiSecret) {
     console.log(`Exchange Worker (private method):`, 'Fetch Deposit Address')
 
     try {
-      const result = await this.ccxt.fetchDepositAddress(symbolId)
-      this.removeApiCredentials()
+      this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      const result = await this.ccxt[userId].fetchDepositAddress(symbolId)
       return result
     }  catch (error) {
       return this.handleCCXTInstanceError(error)

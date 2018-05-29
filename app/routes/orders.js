@@ -4,15 +4,6 @@ const Joi = require('joi')
 
 module.exports = [
   {
-    method: 'DELETE',
-    path: '/exchanges/{exchange}/orders/{uuid}',
-    handler: ordersController.delete,
-    options: {
-      auth: 'jwt',
-      validate: routeValidations
-    }
-  },
-  {
     method: 'GET',
     path: '/exchanges/{exchange}/orders',
     handler: ordersController.index,
@@ -72,5 +63,19 @@ module.exports = [
         }
       }
     }
-  }
+  },
+  {
+    method: 'DELETE',
+    path: '/exchanges/{exchange}/orders/{orderUuid}',
+    handler: ordersController.delete,
+    options: {
+      auth: 'jwt',
+      validate: {
+        params: {
+          exchange: routeValidations.params.exchange,
+          orderUuid: Joi.string().required()
+        }
+      }
+    }
+  },
 ]

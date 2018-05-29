@@ -18,23 +18,15 @@ class Orders {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
-          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
-
-          try {
-            const result = await ExchangeWorkers[exchange].fetchOrders(forceRefresh, userId)
-            return result
-          } catch (error) {
-            if (typeof error === 'string') {
-              return Boom.badRequest(error)
-            } else {
-              return Boom.badImplementation(error)
-            }
+          const result = await ExchangeWorkers[exchange].fetchOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          return result
+        } catch (error) {
+          if (typeof error === 'string') {
+            return Boom.badRequest(error)
+          } else {
+            return Boom.badImplementation(error)
           }
-
-        } catch (err) {
-          return Boom.badImplementation('Failed to set the API credentials in the exchange worker.')
         }
-
       } catch (err) {
         console.log(err)
         return Boom.badImplementation('Failed to retrieve the exchange API credentials from our database.')
@@ -65,19 +57,14 @@ class Orders {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
 
         try {
-          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
-
-          try {
-            const result = await ExchangeWorkers[exchange].fetchClosedOrders(forceRefresh, userId)
-            return result
-          } catch (err) {
-            console.log(err)
-            return Boom.badImplementation('Failed to fetch the closed orders from the exchange.')
+          const result = await ExchangeWorkers[exchange].fetchClosedOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          return result
+        } catch (error) {
+          if (typeof error === 'string') {
+            return Boom.badRequest(error)
+          } else {
+            return Boom.badImplementation(error)
           }
-
-        } catch (err) {
-          console.log(err)
-          return Boom.badImplementation('Failed to set the API credentials in the exchange worker.')
         }
 
       } catch (err) {
@@ -98,19 +85,14 @@ class Orders {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
 
         try {
-          ExchangeWorkers[exchange].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
-
-          try {
-            const result = await ExchangeWorkers[exchange].fetchOpenOrders(forceRefresh, userId)
-            return result
-          } catch (err) {
-            console.log(err)
-            return Boom.badImplementation('Failed to fetch the closed orders from the exchange.')
+          const result = await ExchangeWorkers[exchange].fetchOpenOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          return result
+        } catch (error) {
+          if (typeof error === 'string') {
+            return Boom.badRequest(error)
+          } else {
+            return Boom.badImplementation(error)
           }
-
-        } catch (err) {
-          console.log(err)
-          return Boom.badImplementation('Failed to set the API credentials in the exchange worker.')
         }
 
       } catch (err) {
@@ -143,12 +125,12 @@ class Orders {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
         if (side === 'buy') {
-          result = await ExchangeWorkers[exchangeSlug].createLimitBuyOrder(symbol, amount, price, params, userId)
+          result = await ExchangeWorkers[exchangeSlug].createLimitBuyOrder(symbol, amount, price, params, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         } else {
-          result = await ExchangeWorkers[exchangeSlug].createLimitSellOrder(symbol, amount, price, params, userId)
+          result = await ExchangeWorkers[exchangeSlug].createLimitSellOrder(symbol, amount, price, params, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         }
         return result
       } catch (error) {
@@ -178,12 +160,12 @@ class Orders {
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         // Set key and secret for current user
-        ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
 
         if (side === 'buy') {
-          result = await ExchangeWorkers[exchangeSlug].createMarketBuyOrder(symbol, amount, price, params, userId)
+          result = await ExchangeWorkers[exchangeSlug].createMarketBuyOrder(symbol, amount, price, params, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         } else {
-          result = await ExchangeWorkers[exchangeSlug].createMarketSellOrder(symbol, amount, price, params, userId)
+          result = await ExchangeWorkers[exchangeSlug].createMarketSellOrder(symbol, amount, price, params, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
         }
 
         return result
@@ -198,9 +180,29 @@ class Orders {
   }
 
   delete (request, h) {
-    return {
-      message: 'should cancel an order'
-    }
+    const userId = request.auth.credentials.id
+    const exchangeSlug = request.params.exchange
+    const orderUuid = request.params.orderUuid
+
+    return (async () => {
+      try {
+        const exchange = await getExchangeBySlug(exchangeSlug)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
+
+        // Set key and secret for current user
+        // ExchangeWorkers[exchangeSlug].setApiCredentials(userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+        const result = await ExchangeWorkers[exchangeSlug].cancelOrder(orderUuid, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+
+        return result
+      } catch (error) {
+        if (typeof error === 'string') {
+          return Boom.badRequest(error)
+        } else {
+          return Boom.badImplementation(error)
+        }
+      }
+    })()
   }
 }
 module.exports = new Orders()
