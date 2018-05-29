@@ -36,7 +36,8 @@ class ExchangeWorker {
     try {
       this.ccxt = new ccxt[this.exchangeSlug]({
         timeout: 15000,
-        enableRateLimit: true
+        enableRateLimit: true,
+        verbose: true
       })
       if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker:`, `Worker instance for ${this.exchangeSlug} created.`)
     } catch (error) {
@@ -313,6 +314,36 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         result = await this.ccxt.fetchClosedOrders()
+        this.removeApiCredentials()
+        if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
+        this.setCache(cacheKey, JSON.stringify(result))
+      }
+      return result
+    } catch (error) {
+      return this.handleCCXTInstanceError(error)
+    }
+  }
+
+  // Private (needs userId)
+  async fetchOpenOrders (forceRefresh, userId) {
+    console.log('Exchange Worker (private method):', 'Fetch Open Orders', `/ User ID: ${userId}`)
+
+    const cacheKey = `private:exchanges:orders:open:${this.exchangeSlug}:${userId}`
+
+    try {
+      let result
+
+      if (forceRefresh) {
+        await this.deleteCache(cacheKey)
+      } else {
+        result = await this.getCache(cacheKey)
+      }
+
+      if (result) {
+        result = JSON.parse(result)
+      } else {
+        // TODO: Binance requires a list of symbols to fetch the orders
+        result = await this.ccxt.fetchOpenOrders()
         this.removeApiCredentials()
         if (result.info) delete result.info // Deletes the "info" object from the response. The info object contains the original exchange data
         this.setCache(cacheKey, JSON.stringify(result))

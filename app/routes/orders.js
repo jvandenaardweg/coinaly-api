@@ -14,15 +14,6 @@ module.exports = [
   },
   {
     method: 'GET',
-    path: '/exchanges/{exchange}/orders/{status}',
-    handler: ordersController.indexStatus,
-    options: {
-      auth: 'jwt',
-      validate: routeValidations
-    }
-  },
-  {
-    method: 'GET',
     path: '/exchanges/{exchange}/orders',
     handler: ordersController.index,
     options: {
@@ -34,6 +25,24 @@ module.exports = [
     method: 'GET',
     path: '/exchanges/{exchange}/orders/closed',
     handler: ordersController.indexClosed,
+    options: {
+      auth: 'jwt',
+      validate: routeValidations
+    }
+  },
+  {
+    method: 'GET',
+    path: '/exchanges/{exchange}/orders/open',
+    handler: ordersController.indexOpen,
+    options: {
+      auth: 'jwt',
+      validate: routeValidations
+    }
+  },
+  {
+    method: 'POST',
+    path: '/exchanges/{exchange}/orders',
+    handler: ordersController.create,
     options: {
       auth: 'jwt',
       validate: routeValidations

@@ -6,10 +6,11 @@ const redis = require('../cache/redis')
 const { getAllPrices, insertNewPrices } = require('../database/methods/prices')
 const fetch = require('node-fetch')
 
-async function setCache (result) {
+async function setCache (key, result) {
   const resultStringHMSET = convertObjectToKeyString(result)
-  await redis.del('prices') // Empty, the cache first, so when we add new keys, it's always in sync with our database
-  await redis.hmset('prices', resultStringHMSET)
+  await redis.del(key) // Empty, the cache first, so when we add new keys, it's always in sync with our database
+  await redis.hmset(key, resultStringHMSET)
+  await redis.expire(key, 3600) // 1 hour
 }
 
 class Prices {
@@ -22,9 +23,13 @@ class Prices {
         if (Object.keys(cachedPrices).length) {
           return convertKeyStringToObject(cachedPrices)
         } else {
-          return {
-            message: 'Prices cache is empty. First run prices/fetch.'
-          }
+          const prices = await insertNewPrices()
+          const result = await getAllPrices()
+          await setCache('prices', result)
+          return result
+          // return {
+          //   message: 'Prices cache is empty. First run prices/fetch.'
+          // }
         }
       } catch (error) {
         return Boom.badImplementation(error)
@@ -37,7 +42,7 @@ class Prices {
       try {
         const prices = await insertNewPrices()
         const result = await getAllPrices()
-        await setCache(result)
+        await setCache('prices', result)
         return result
       } catch (error) {
         return Boom.badImplementation(error)
