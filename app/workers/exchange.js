@@ -12,8 +12,8 @@ class ExchangeWorker {
     }
   }
 
-  sleep (ms) {
-    // Sleep is a method to throttle request and respect the API's rate limitations
+  rateLimit (ms) {
+    // rateLimit is a method to throttle request and respect the API's rate limitations
     // We have used CCXT's methods to throttle requests, see helpers/throttle.js and helpers/time.js
     // We can work around this to scale this process horizontally, that is: spawn multiple servers and load balance between those servers
     console.log(`Exchange Worker (${this.exchangeSlug}: rate limiting)`)
@@ -340,7 +340,7 @@ class ExchangeWorker {
       } else {
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
         // console.log(this.ccxt[userId].tokenBucket)
-        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+        await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchBalance()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -373,7 +373,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+        await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -406,7 +406,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+        await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchClosedOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -439,7 +439,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+        await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchOpenOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -458,7 +458,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createLimitBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
@@ -475,7 +475,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createLimitSellOrder(symbol, amount, price, params)
       return result
     } catch (error) {
@@ -492,7 +492,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createMarketBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
@@ -509,7 +509,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createMarketSellOrder (symbol, amount, price, params)
       return result
     } catch (error) {
@@ -526,7 +526,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].cancelOrder(orderUuid)
       return result
     } catch (error) {
@@ -544,7 +544,7 @@ class ExchangeWorker {
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
-      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
+      await this.rateLimit(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].fetchDepositAddress(symbolId)
       return result
     }  catch (error) {
