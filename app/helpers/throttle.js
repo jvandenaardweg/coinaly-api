@@ -2,63 +2,65 @@
 
 /*  ------------------------------------------------------------------------ */
 
+// Taken from: https://github.com/ccxt/ccxt/tree/master/js/base/functions
+
 const { sleep
-      , now } = require ('./time')
+  , now } = require('./time')
 
 /*  ------------------------------------------------------------------------ */
 
 module.exports = {
 
-    throttle: function throttle (cfg) {
+  throttle: function throttle(cfg) {
 
-        let   lastTimestamp = now ()
-            , numTokens     = (typeof cfg.numTokens !== 'undefined') ? cfg.numTokens : cfg.capacity
-            , running       = false
-            , counter       = 0
+    let lastTimestamp = now()
+      , numTokens = (typeof cfg.numTokens !== 'undefined') ? cfg.numTokens : cfg.capacity
+      , running = false
+      , counter = 0
 
-        const queue = []
+    const queue = []
 
-        return Object.assign ((cost) => {
+    return Object.assign((cost) => {
 
-            if (queue.length > cfg.maxCapacity)
-                throw new Error ('Backlog is over max capacity of ' + cfg.maxCapacity)
+      if (queue.length > cfg.maxCapacity)
+        throw new Error('Backlog is over max capacity of ' + cfg.maxCapacity)
 
-            return new Promise (async (resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
 
-                try {
-                    queue.push ({ cost, resolve, reject })
+        try {
+          queue.push({ cost, resolve, reject })
 
-                    if (!running) {
-                        running = true
-                        while (queue.length > 0) {
-                            const hasEnoughTokens = cfg.capacity ? (numTokens > 0) : (numTokens >= 0)
-                            if (hasEnoughTokens) {
-                                if (queue.length > 0) {
-                                    let { cost, resolve, reject } = queue[0]
-                                    cost = (cost || cfg.defaultCost)
-                                    if (numTokens >= Math.min (cost, cfg.capacity)) {
-                                        numTokens -= cost
-                                        queue.shift ()
-                                        resolve ()
-                                    }
-                                }
-                            }
-                            const t = now ()
-                                , elapsed = t - lastTimestamp
-                            lastTimestamp = t
-                            numTokens = Math.min (cfg.capacity, numTokens + elapsed * cfg.refillRate)
-                            await sleep (cfg.delay)
-                        }
-                        running = false
-                    }
-
-                } catch (e) {
-                    reject (e)
+          if (!running) {
+            running = true
+            while (queue.length > 0) {
+              const hasEnoughTokens = cfg.capacity ? (numTokens > 0) : (numTokens >= 0)
+              if (hasEnoughTokens) {
+                if (queue.length > 0) {
+                  let { cost, resolve, reject } = queue[0]
+                  cost = (cost || cfg.defaultCost)
+                  if (numTokens >= Math.min(cost, cfg.capacity)) {
+                    numTokens -= cost
+                    queue.shift()
+                    resolve()
+                  }
                 }
-            })
+              }
+              const t = now()
+                , elapsed = t - lastTimestamp
+              lastTimestamp = t
+              numTokens = Math.min(cfg.capacity, numTokens + elapsed * cfg.refillRate)
+              await sleep(cfg.delay)
+            }
+            running = false
+          }
 
-        }, cfg, { configure: newCfg => throttle (Object.assign ({}, cfg, newCfg)) })
-    }
+        } catch (e) {
+          reject(e)
+        }
+      })
+
+    }, cfg, { configure: newCfg => throttle(Object.assign({}, cfg, newCfg)) })
+  }
 }
 
 /*  ------------------------------------------------------------------------ */
