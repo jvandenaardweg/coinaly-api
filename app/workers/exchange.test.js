@@ -36,9 +36,14 @@ describe('workers/exchange', () => {
     expect(ExchangeWorkers['bittrex'].ccxt.secret).toBe(undefined)
   })
 
-  it('should create a CCXT instance with rate limiting enabled', () => {
+  it('should create a CCXT instance with rate limiting disabled', () => {
     ExchangeWorkers['bittrex'].setApiCredentials('public', null, null)
-    expect(ExchangeWorkers['bittrex'].ccxt['public'].enableRateLimit).toBe(true)
+    expect(ExchangeWorkers['bittrex'].ccxt['public'].enableRateLimit).toBe(false)
+  })
+
+  it('should create a CCXT throttle bucket', () => {
+    ExchangeWorkers['bittrex'].setApiCredentials('public', null, null)
+    expect(ExchangeWorkers['bittrex'].ccxt['public'].throttle).toBeDefined()
   })
 
   it('should set the correct API credentials', () => {
