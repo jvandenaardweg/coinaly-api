@@ -1,15 +1,23 @@
 const ccxt = require('ccxt')
-
+const { throttle } = require('../helpers/throttle')
 class ExchangeWorker {
   constructor (exchangeSlug, redis) {
     this.ccxt = {}
     this.exchangeSlug = exchangeSlug.toLowerCase()
     this.redis = redis
     this.supportedExchanges = ['bittrex', 'binance', 'poloniex']
-
+    this.throttle = null
     if (!this.supportedExchanges.includes(exchangeSlug)) {
       throw new Error(`The exchange "${exchangeSlug}" is currently not supported.`)
     }
+  }
+
+  sleep (ms) {
+    // Sleep is a method to throttle request and respect the API's rate limitations
+    // We have used CCXT's methods to throttle requests, see helpers/throttle.js and helpers/time.js
+    // We can work around this to scale this process horizontally, that is: spawn multiple servers and load balance between those servers
+    console.log(`Exchange Worker (${this.exchangeSlug}: rate limiting)`)
+    return this.throttle()
   }
 
   setApiCredentials (userId, plainTextApiKey, plainTextApiSecret) {
@@ -22,18 +30,24 @@ class ExchangeWorker {
   createCCXTInstance (userId, plainTextApiKey, plainTextApiSecret) {
     try {
       this.ccxt[userId] = new ccxt[this.exchangeSlug]({
-        id: userId,
         timeout: 15000,
-        enableRateLimit: true,
+        enableRateLimit: true, // We also use the rate limiting at each private method request
         verbose: false,
         apiKey: plainTextApiKey,
         secret: plainTextApiSecret
       })
-      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker (creation):`, `Worker instance for User ID "${userId}" for "${this.exchangeSlug}" created.`)
+
+      if (!this.throttle) this.setRateLimiter(this.ccxt[userId].tokenBucket)
+
+      if (process.env.NODE_ENV !== 'test') console.log(`Exchange Worker (${this.exchangeSlug}: creation):`, `Worker instance for User ID "${userId}" for "${this.exchangeSlug}" created.`)
     } catch (error) {
       console.log(`Exchange Worker:`, `FAILED to create worker instance for ${this.exchangeSlug} created.`)
       this.handleCCXTInstanceError(error)
     }
+  }
+
+  setRateLimiter (tokenBucket) {
+    this.throttle = throttle(tokenBucket)
   }
 
   handleCCXTInstanceError (error) {
@@ -111,6 +125,7 @@ class ExchangeWorker {
       } else {
         message = `The ${this.exchangeSlug} exchange responded with an unknown error. Is your API key and secret correct and active? If so, you should try again.`
         console.log('CCXT:', 'Error', errorName, message)
+        console.log(error)
         throw message
       }
     } else if (error instanceof ccxt.NetworkError) {
@@ -143,8 +158,8 @@ class ExchangeWorker {
   // Public
   // Markets are cached for 1 hour
   async fetchMarkets (forceRefresh) {
-    console.time(`Exchange Worker (public method) (fetchMarkets)`)
-    console.log(`Exchange Worker (public method):`, `Fetch Markets, on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: public method) (fetchMarkets)`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: public method):`, `Fetch Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:fetch:${this.exchangeSlug}`
 
@@ -169,15 +184,15 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (public method) (fetchMarkets)`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: public method) (fetchMarkets)`)
     }
   }
 
   // Public
   // Markets are cached for 1 hour
   async loadMarkets (forceRefresh) {
-    console.time(`Exchange Worker (public method) (loadMarkets)`)
-    console.log(`Exchange Worker (public method):`, `Load Markets, on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: public method) (loadMarkets)`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: public method):`, `Load Markets, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:load:${this.exchangeSlug}`
 
@@ -202,15 +217,15 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.time(`Exchange Worker (public method) (loadMarkets)`)
+      console.time(`Exchange Worker (${this.exchangeSlug}: public method) (loadMarkets)`)
     }
   }
 
   // Public
   // Tickers are cached for 5 seconds
   async fetchTickers (forceRefresh) {
-    console.time(`Exchange Worker (public method) (fetchTickers)`)
-    console.log(`Exchange Worker (public method):`, `Fetch All Tickers, on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: public method) (fetchTickers)`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: public method):`, `Fetch All Tickers, on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:markets:tickers:${this.exchangeSlug}`
 
@@ -235,15 +250,15 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (public method) (fetchTickers)`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: public method) (fetchTickers)`)
     }
   }
 
   // Public
   // Ticker is cached for 5 seconds
   async fetchTicker (symbol, forceRefresh) {
-    console.time(`Exchange Worker (public method) (fetchTicker)`)
-    console.log(`Exchange Worker (public method):`, `Fetch Ticker, for "${symbol}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: public method) (fetchTicker)`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: public method):`, `Fetch Ticker, for "${symbol}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `public:exchanges:ticker:${this.exchangeSlug}:${symbol}`
 
@@ -268,14 +283,14 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (public method) (fetchTicker)`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: public method) (fetchTicker)`)
     }
   }
 
   // Public method
   async fetchOHLCV (marketSymbol, interval = '1m', forceRefresh) {
-    console.time(`Exchange Worker (public method) (fetchOHLCV)`)
-    console.log(`Exchange Worker (public method):`, `Fetch OHLCV, for "${marketSymbol}" on "${this.exchangeSlug}".`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: public method) (fetchOHLCV)`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: public method):`, `Fetch OHLCV, for "${marketSymbol}" on "${this.exchangeSlug}".`)
 
     const cacheKey = `public:exchanges:ohlcv:${this.exchangeSlug}:${marketSymbol}:${interval}`
 
@@ -300,14 +315,14 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (public method) (fetchOHLCV)`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: public method) (fetchOHLCV)`)
     }
   }
 
   // Private (needs userId)
   async fetchBalance (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (fetchBalance) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Fetch Balance, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (fetchBalance) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Fetch Balance, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:balances:${this.exchangeSlug}:${userId}`
 
@@ -324,6 +339,8 @@ class ExchangeWorker {
         result = JSON.parse(result)
       } else {
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        // console.log(this.ccxt[userId].tokenBucket)
+        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchBalance()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -331,14 +348,14 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (fetchBalance) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (fetchBalance) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (fetchOrders) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Fetch Orders, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (fetchOrders) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Fetch Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:${this.exchangeSlug}:${userId}`
 
@@ -356,6 +373,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -363,14 +381,14 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (fetchOrders) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (fetchOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchClosedOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (fetchClosedOrders) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Fetch Closed Orders, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (fetchClosedOrders) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Fetch Closed Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:closed:${this.exchangeSlug}:${userId}`
 
@@ -388,6 +406,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchClosedOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -395,14 +414,14 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (fetchClosedOrders) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (fetchClosedOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async fetchOpenOrders (forceRefresh, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (fetchOpenOrders) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Fetch Open Orders, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (fetchOpenOrders) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Fetch Open Orders, for user "${userId}" on "${this.exchangeSlug}"`)
 
     const cacheKey = `private:exchanges:orders:open:${this.exchangeSlug}:${userId}`
 
@@ -420,6 +439,7 @@ class ExchangeWorker {
       } else {
         // TODO: Binance requires a list of symbols to fetch the orders
         this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+        await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
         result = await this.ccxt[userId].fetchOpenOrders()
         this.setCache(cacheKey, JSON.stringify(result))
       }
@@ -427,122 +447,128 @@ class ExchangeWorker {
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (fetchOpenOrders) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (fetchOpenOrders) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createLimitBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (createLimitBuyOrder) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Create Limit Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (createLimitBuyOrder) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Create Limit Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createLimitBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (createLimitBuyOrder) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (createLimitBuyOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createLimitSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (createLimitSellOrder) (User ID "${userId}")`)
-    onsole.log('Exchange Worker (private method):', `Create Limit Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (createLimitSellOrder) (User ID "${userId}")`)
+    onsole.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Create Limit Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createLimitSellOrder(symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (createLimitSellOrder) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (createLimitSellOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createMarketBuyOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (createMarketBuyOrder) (User ID "${userId}")`)
-    onsole.log('Exchange Worker (private method):', `Create Market Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (createMarketBuyOrder) (User ID "${userId}")`)
+    onsole.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Create Market Buy Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createMarketBuyOrder(symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (createMarketBuyOrder) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (createMarketBuyOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async createMarketSellOrder (symbol, amount, price, params = {}, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (createMarketSellOrder) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Create Market Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (createMarketSellOrder) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Create Market Sell Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].createMarketSellOrder (symbol, amount, price, params)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (createMarketSellOrder) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (createMarketSellOrder) (User ID "${userId}")`)
     }
   }
 
   // Private (needs userId)
   async cancelOrder(orderUuid, userId, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (cancelOrder) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Cancel Order, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (cancelOrder) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Cancel Order, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].cancelOrder(orderUuid)
       return result
     } catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.time(`Exchange Worker (private method) (cancelOrder) (User ID "${userId}")`)
+      console.time(`Exchange Worker (${this.exchangeSlug}: private method) (cancelOrder) (User ID "${userId}")`)
     }
   }
 
   // Private
   // IMPORTENT: We should never cache this endpoint, so we always got the latest address from the exchange
   async fetchDepositAddress (symbolId, userId, forceRefresh, plainTextApiKey, plainTextApiSecret) {
-    console.time(`Exchange Worker (private method) (fetchDepositAddress) (User ID "${userId}")`)
-    console.log('Exchange Worker (private method):', `Fetch Deposit Address, for user "${userId}" on "${this.exchangeSlug}"`)
+    console.time(`Exchange Worker (${this.exchangeSlug}: private method) (fetchDepositAddress) (User ID "${userId}")`)
+    console.log(`Exchange Worker (${this.exchangeSlug}: private method):`, `Fetch Deposit Address, for user "${userId}" on "${this.exchangeSlug}"`)
 
     try {
       this.setApiCredentials(userId, plainTextApiKey, plainTextApiSecret)
+      await this.sleep(this.ccxt[userId].rateLimit) // Since we use multiple CCXT instances, we need to throttle requests here to respect the API rate limits
       const result = await this.ccxt[userId].fetchDepositAddress(symbolId)
       return result
     }  catch (error) {
       return this.handleCCXTInstanceError(error)
     } finally {
-      console.timeEnd(`Exchange Worker (private method) (fetchDepositAddress) (User ID "${userId}")`)
+      console.timeEnd(`Exchange Worker (${this.exchangeSlug}: private method) (fetchDepositAddress) (User ID "${userId}")`)
     }
   }
 
   async getCache (key) {
-    console.log(`Exchange Worker (redis):`, 'Get Cache', key)
+    console.log(`Exchange Worker (${this.exchangeSlug}: redis):`, 'Get Cache', key)
     const result = await this.redis.hget(key, 'all')
     return result
   }
 
   async setCache (key, data, expire = 3600) {
-    console.log(`Exchange Worker (redis):`, 'Set Cache', key)
+    console.log(`Exchange Worker (${this.exchangeSlug}: redis):`, 'Set Cache', key)
     const result = await this.redis.hset(key, 'all', data)
     this.redis.expire(key, expire) // Expire 3600 = 1 hour
     return result
   }
 
   async deleteCache (key) {
-    console.log(`Exchange Worker (redis):`, 'Delete Cache', key)
+    console.log(`Exchange Worker (${this.exchangeSlug}: redis):`, 'Delete Cache', key)
     const result = await this.redis.keys(key)
     .then(keys => {
       const pipeline = this.redis.pipeline()
