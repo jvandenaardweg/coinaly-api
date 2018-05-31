@@ -1,5 +1,6 @@
 const ccxt = require('ccxt')
-const { throttle } = require('../helpers/throttle')
+const { throttle } = require('ccxt/js/base/functions/throttle.js')
+
 class ExchangeWorker {
   constructor (exchangeSlug, redis) {
     this.ccxt = {}
@@ -7,6 +8,7 @@ class ExchangeWorker {
     this.redis = redis
     this.supportedExchanges = ['bittrex', 'binance', 'poloniex']
     this.throttle = null
+
     if (!this.supportedExchanges.includes(exchangeSlug)) {
       throw new Error(`The exchange "${exchangeSlug}" is currently not supported.`)
     }
@@ -14,8 +16,12 @@ class ExchangeWorker {
 
   async rateLimit () {
     // rateLimit is a method to throttle request and respect the API's rate limitations
-    // We have used CCXT's methods to throttle requests, see helpers/throttle.js and helpers/time.js
-    // We can work around this to scale this process horizontally, that is: spawn multiple servers and load balance between those servers
+    // We have used CCXT's methods to throttle requests
+    // We do not use the build in throttling because we spawn multiple CCXT instances. One per user.
+    // Thus, the rate limiting is not working properly.
+    //
+    // If we need more request per second, we need to scale this worker process horizontally.
+    // Meaning: spawn multiple servers and load balance between those servers.
     const timeStart = new Date().getTime()
 
     await this.throttle()
@@ -39,7 +45,7 @@ class ExchangeWorker {
     try {
       this.ccxt[userId] = new ccxt[this.exchangeSlug]({
         timeout: 15000,
-        enableRateLimit: false, // For private user related request, we use our global rateLimit (this.throttle)
+        enableRateLimit: false, // We set the rate limiting to false, because we handle this ourself. See this.rateLimit
         verbose: false,
         apiKey: plainTextApiKey,
         secret: plainTextApiSecret
