@@ -32,7 +32,7 @@ const fetch = require('node-fetch')
 */
 async function getPrices () {
   try {
-    const symbols = 'BTC,ETH,USDT,BNB,XRP,BCH,EOS,LTC,ADA' // <- Should contain a list of all quote symbols from exchanges, so we can do a proper value calculation
+    const symbols = 'USD,EUR,GBP,JPY,KRW,BTC,ETH,USDT,BNB,XRP,BCH,EOS,LTC,ADA' // <- Should contain a list of all quote symbols from exchanges, so we can do a proper value calculation
     const result = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=USD,EUR,GBP,JPY,KRW`).then(response => response.json())
     return result
   } catch (err) {
