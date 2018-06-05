@@ -62,7 +62,6 @@ class Prices {
       limit = 7
     } else if (interval === '1m') {
       limit = 31
-      limit = 93
     }
 
     return (async () => {
