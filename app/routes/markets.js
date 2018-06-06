@@ -40,7 +40,7 @@ module.exports = [
         query: {
           forceRefresh: Joi.boolean(),
           marketSymbol: Joi.string().required(),
-          interval: Joi.string().required().valid('1h', '1d', '1w', '1m')
+          interval: Joi.string().required().valid('1m', '1h', '1d', 'all')
         },
         params: {
           exchange: Joi.string().valid('bittrex', 'binance', 'poloniex').required()
