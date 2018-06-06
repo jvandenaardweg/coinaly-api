@@ -10,11 +10,11 @@ class Orders {
   index (request, h) {
     const userId = request.auth.credentials.id
     const forceRefresh = request.query.forceRefresh
-    const exchange = request.params.exchange
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
-        const exchange = await getExchangeBySlug(exchange) // TODO: change slug to use just the ID in the request.params?
+        const exchange = await getExchangeBySlug(exchangeSlug) // TODO: change slug to use just the ID in the request.params?
         const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
@@ -48,16 +48,16 @@ class Orders {
 
   indexClosed (request, h) {
     const userId = request.auth.credentials.id
-    const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
-    const exchange = request.params.exchange
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
-        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
+        const exchange = await getExchangeBySlug(exchangeSlug)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
-          const result = await ExchangeWorkers[exchange].fetchClosedOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          const result = await ExchangeWorkers[exchangeSlug].fetchClosedOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
           return result
         } catch (error) {
           if (typeof error === 'string') {
@@ -76,16 +76,16 @@ class Orders {
 
   indexOpen (request, h) {
     const userId = request.auth.credentials.id
-    const exchangeId = 1 // TODO: make dynamic
     const forceRefresh = request.query.forceRefresh
-    const exchange = request.params.exchange
+    const exchangeSlug = request.params.exchange
 
     return (async () => {
       try {
-        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchangeId)
+        const exchange = await getExchangeBySlug(exchangeSlug)
+        const userApiCredentials = await getDecodedExchangeApiCredentials(userId, exchange.id)
 
         try {
-          const result = await ExchangeWorkers[exchange].fetchOpenOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
+          const result = await ExchangeWorkers[exchangeSlug].fetchOpenOrders(forceRefresh, userId, userApiCredentials.plainTextApiKey, userApiCredentials.plainTextApiSecret)
           return result
         } catch (error) {
           if (typeof error === 'string') {
