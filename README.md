@@ -1,3 +1,5 @@
+> **Note**: Project is not being worked on, at the moment. This repository now serves as an example for what I've been working on in my free time.
+
 # Getting started
 
 ## Development
